@@ -18,17 +18,16 @@
     .active {
       display: block;
     }
-    input, button {
-      padding: 10px;
-      margin: 8px;
+    button {
+      padding: 10px 20px;
+      margin-top: 20px;
       border-radius: 5px;
       border: none;
-    }
-    button {
       background: white;
       color: #0f4c81;
       font-weight: bold;
       cursor: pointer;
+      font-size: 16px;
     }
   </style>
 </head>
@@ -37,22 +36,13 @@
   <!-- الصفحة الرئيسية -->
   <div id="home" class="page active">
     <h1>Välkommen till MittSchema</h1>
-    <button onclick="showPage('login')">Logga in</button>
-  </div>
-
-  <!-- صفحة تسجيل الدخول -->
-  <div id="login" class="page">
-    <h1>Logga in</h1>
-    <input type="text" id="username" placeholder="Användarnamn"><br>
-    <input type="password" id="password" placeholder="Lösenord"><br>
-    <button onclick="login()">Logga in</button>
+    <button onclick="showPage('schema')">Logga in</button>
   </div>
 
   <!-- صفحة الجدول -->
   <div id="schema" class="page">
     <h1>Ditt Schema</h1>
     <p>Här visas ditt schema 👇</p>
-    <!-- ممكن تحط صورة أو جدول هون -->
     <button onclick="showPage('home')">Logga ut</button>
   </div>
 
@@ -60,14 +50,6 @@
     function showPage(pageId) {
       document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
       document.getElementById(pageId).classList.add('active');
-    }
-
-    function login() {
-      let name = document.getElementById("username").value;
-      if(name.trim() !== "") {
-        alert("Hej " + name + ", välkommen tillbaka!");
-        showPage('schema');
-      }
     }
   </script>
 </body>
