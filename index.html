@@ -1,129 +1,29 @@
 <!DOCTYPE html>
-<html lang="sv">
+<html lang="ar">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>MittSchema - Logga in</title>
-  <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-      font-family: Arial, sans-serif;
-    }
-
-    body {
-      height: 100vh;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      background: linear-gradient(to right, #004e92, #000428); /* الأزرق */
-    }
-
-    .login-box {
-      background: rgba(255, 255, 255, 0.15); /* شفاف */
-      backdrop-filter: blur(12px);
-      border-radius: 15px;
-      padding: 40px;
-      width: 320px;
-      color: white;
-      box-shadow: 0 0 25px rgba(0, 0, 0, 0.4);
-      text-align: center;
-    }
-
-    .login-box h2 {
-      margin-bottom: 25px;
-      font-size: 24px;
-    }
-
-    .login-box input {
-      width: 100%;
-      padding: 12px;
-      margin: 10px 0;
-      border: none;
-      border-radius: 8px;
-      outline: none;
-      font-size: 14px;
-    }
-
-    .login-box input[type="text"],
-    .login-box input[type="password"] {
-      background: rgba(255, 255, 255, 0.2);
-      color: white;
-    }
-
-    .login-box input::placeholder {
-      color: #e0e0e0;
-    }
-
-    .login-box button {
-      width: 100%;
-      padding: 12px;
-      margin-top: 15px;
-      border: none;
-      border-radius: 8px;
-      background: white;
-      color: #004e92;
-      font-weight: bold;
-      font-size: 15px;
-      cursor: pointer;
-      transition: 0.3s;
-    }
-
-    .login-box button:hover {
-      background: #e6e6e6;
-    }
-
-    .options {
-      display: flex;
-      justify-content: space-between;
-      font-size: 12px;
-      margin-top: 12px;
-    }
-
-    .options a {
-      color: #ddd;
-      text-decoration: none;
-    }
-
-    .options a:hover {
-      text-decoration: underline;
-    }
-
-    .extra-options {
-      margin-top: 20px;
-      font-size: 14px;
-    }
-
-    .extra-options a {
-      display: block;
-      margin-top: 8px;
-      color: #fff;
-      text-decoration: none;
-      font-weight: bold;
-    }
-
-    .extra-options a:hover {
-      text-decoration: underline;
-    }
-  </style>
+  <title>تسجيل الدخول</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
   <div class="login-box">
-    <h2>Logga in</h2>
-    <form>
-      <input type="text" placeholder="Användarnamn" required>
-      <input type="password" placeholder="Lösenord" required>
-      <button type="submit">Logga in</button>
+    <h2>تسجيل الدخول</h2>
+    <form id="loginForm">
+      <input type="text" id="username" placeholder="اسم المستخدم" required>
+      <input type="password" id="password" placeholder="كلمة المرور" required>
+      <button type="submit">دخول</button>
       <div class="options">
-        <label><input type="checkbox"> Kom ihåg mig</label>
-        <a href="#">Glömt lösenord?</a>
+        <label><input type="checkbox" id="remember"> تذكرني</label>
+        <a href="#">نسيت كلمة المرور؟</a>
       </div>
-      <div class="extra-options">
-        <a href="#">Skapa konto</a>
-        <a href="#">Fortsätt som gäst</a>
+      <div class="links">
+        <a href="register.html">إنشاء حساب</a> | 
+        <a href="schema.html">الدخول كضيف</a>
       </div>
     </form>
   </div>
+
+  <script src="script.js"></script>
 </body>
 </html>
