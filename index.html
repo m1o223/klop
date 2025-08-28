@@ -40,3 +40,61 @@
   </div>
 </body>
 </html>
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+  <meta charset="UTF-8">
+  <title>Logga in - MittSchema</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: linear-gradient(to right, #1e81b0, #0f4c81);
+      color: white;
+      text-align: center;
+      margin: 0;
+      padding: 0;
+    }
+    .container {
+      margin-top: 150px;
+    }
+    input {
+      padding: 12px;
+      margin: 8px;
+      width: 220px;
+      border-radius: 5px;
+      border: none;
+    }
+    button {
+      padding: 12px 30px;
+      margin-top: 10px;
+      background: white;
+      color: #0f4c81;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+    button:hover {
+      background: #dfe6e9;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Logga in</h1>
+    <input type="text" id="username" placeholder="Användarnamn"><br>
+    <input type="password" id="password" placeholder="Lösenord"><br>
+    <button onclick="login()">Logga in</button>
+  </div>
+
+  <script>
+    function login() {
+      let name = document.getElementById("username").value;
+      if(name.trim() !== "") {
+        alert("Hej " + name + ", välkommen tillbaka!");
+        window.location.href = "index.html"; 
+      }
+    }
+  </script>
+</body>
+</html>
