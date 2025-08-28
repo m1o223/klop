@@ -13,47 +13,30 @@
       padding: 0;
     }
     .container {
-      margin-top: 100px;
+      margin-top: 200px;
     }
-    input {
-      padding: 10px;
-      margin: 5px;
-      border-radius: 5px;
-      border: none;
+    h1 {
+      font-size: 2.5em;
+      margin-bottom: 20px;
     }
-    button {
-      padding: 10px 20px;
-      background-color: #ffffff;
+    a {
+      display: inline-block;
+      padding: 12px 25px;
+      background: white;
       color: #0f4c81;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
+      text-decoration: none;
       font-weight: bold;
+      border-radius: 8px;
     }
-    button:hover {
-      background-color: #dfe6e9;
+    a:hover {
+      background: #dfe6e9;
     }
   </style>
 </head>
 <body>
   <div class="container">
-    <h1 id="welcome">Välkommen till MittSchema</h1>
-    
-    <div id="login">
-      <input type="text" id="username" placeholder="Användarnamn"><br>
-      <input type="password" id="password" placeholder="Lösenord"><br>
-      <button onclick="login()">Logga in</button>
-    </div>
+    <h1>Välkommen till MittSchema</h1>
+    <a href="login.html">Logga in</a>
   </div>
-
-  <script>
-    function login() {
-      let name = document.getElementById("username").value;
-      if(name.trim() !== "") {
-        document.getElementById("welcome").innerText = "Hej " + name + ", välkommen tillbaka!";
-        document.getElementById("login").style.display = "none";
-      }
-    }
-  </script>
 </body>
 </html>
