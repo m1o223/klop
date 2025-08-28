@@ -1,38 +1,59 @@
 <!DOCTYPE html>
-<html lang="ar">
+<html lang="sv">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>مرحباً بك</title>
+  <title>MittSchema</title>
   <style>
     body {
       font-family: Arial, sans-serif;
-      background: linear-gradient(to right, #6a11cb, #2575fc);
+      background: linear-gradient(to right, #0f4c81, #1e81b0);
       color: white;
       text-align: center;
-      padding-top: 100px;
+      margin: 0;
+      padding: 0;
     }
-    h1 {
-      font-size: 48px;
+    .container {
+      margin-top: 100px;
     }
-    p {
-      font-size: 20px;
+    input {
+      padding: 10px;
+      margin: 5px;
+      border-radius: 5px;
+      border: none;
     }
     button {
-      margin-top: 20px;
       padding: 10px 20px;
-      font-size: 18px;
+      background-color: #ffffff;
+      color: #0f4c81;
       border: none;
       border-radius: 5px;
-      background: white;
-      color: #2575fc;
       cursor: pointer;
+      font-weight: bold;
+    }
+    button:hover {
+      background-color: #dfe6e9;
     }
   </style>
 </head>
 <body>
-  <h1>أهلاً بك 👋</h1>
-  <p>هذا أول موقع ترفعه على GitHub Pages 🚀</p>
-  <button onclick="alert('أهلاً وسهلاً!')">اضغط هنا</button>
+  <div class="container">
+    <h1 id="welcome">Välkommen till MittSchema</h1>
+    
+    <div id="login">
+      <input type="text" id="username" placeholder="Användarnamn"><br>
+      <input type="password" id="password" placeholder="Lösenord"><br>
+      <button onclick="login()">Logga in</button>
+    </div>
+  </div>
+
+  <script>
+    function login() {
+      let name = document.getElementById("username").value;
+      if(name.trim() !== "") {
+        document.getElementById("welcome").innerText = "Hej " + name + ", välkommen tillbaka!";
+        document.getElementById("login").style.display = "none";
+      }
+    }
+  </script>
 </body>
 </html>
