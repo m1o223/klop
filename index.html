@@ -1,94 +1,495 @@
 <!DOCTYPE html>
 <html lang="sv">
 <head>
-  <meta charset="UTF-8">
-  <title>Logga in</title>
-  <style>
-    body {
-      font-family: "Segoe UI", Arial, sans-serif;
-      background: linear-gradient(to right, #0f2027, #203a43, #2c5364);
-      margin: 0;
-      padding: 0;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-    }
-    .login-box {
-      background: rgba(255, 255, 255, 0.15);
-      backdrop-filter: blur(12px);
-      border-radius: 16px;
-      box-shadow: 0 8px 24px rgba(0,0,0,0.3);
-      padding: 40px;
-      width: 350px;
-      color: #fff;
-    }
-    h2 {
-      margin-bottom: 25px;
-      color: #fff;
-    }
-    input {
-      display: block;
-      width: 100%;
-      padding: 12px;
-      margin: 12px 0;
-      border: none;
-      border-radius: 6px;
-      background: rgba(255, 255, 255, 0.9);
-      font-size: 15px;
-    }
-    button {
-      background: #007BFF;
-      color: white;
-      border: none;
-      padding: 14px;
-      width: 100%;
-      border-radius: 6px;
-      cursor: pointer;
-      font-size: 16px;
-      margin-top: 10px;
-    }
-    button:hover {
-      background: #0056b3;
-    }
-    .remember {
-      display: flex;
-      align-items: center;
-      font-size: 14px;
-      margin-top: 8px;
-    }
-    .remember label {
-      margin-left: 6px;
-    }
-    .options {
-      margin-top: 18px;
-      font-size: 14px;
-    }
-    .options a {
-      color: #aad4ff;
-      text-decoration: none;
-      margin: 0 5px;
-    }
-    .options a:hover {
-      text-decoration: underline;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MittSchema - Din schemaapp</title>
+    <style>
+        :root {
+            --primary-dark: #0f2027;
+            --primary-mid: #203a43;
+            --primary-light: #2c5364;
+            --accent: #1E6BFF;
+            --text-light: #ffffff;
+            --text-dark: #333333;
+            --card-bg: rgba(255, 255, 255, 0.1);
+            --shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, var(--primary-dark), var(--primary-mid), var(--primary-light));
+            color: var(--text-light);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 0;
+            margin-bottom: 30px;
+        }
+
+        .logo {
+            font-size: 28px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+        }
+
+        .logo-icon {
+            margin-right: 10px;
+            font-size: 32px;
+        }
+
+        nav ul {
+            display: flex;
+            list-style: none;
+        }
+
+        nav li {
+            margin-left: 25px;
+        }
+
+        nav a {
+            color: var(--text-light);
+            text-decoration: none;
+            font-weight: 500;
+            transition: opacity 0.3s;
+        }
+
+        nav a:hover {
+            opacity: 0.8;
+        }
+
+        .btn {
+            background-color: var(--accent);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 50px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+            box-shadow: var(--shadow);
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 25px rgba(30, 107, 255, 0.3);
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 2px solid var(--accent);
+            color: var(--text-light);
+        }
+
+        .hero {
+            text-align: center;
+            padding: 40px 0;
+            margin-bottom: 50px;
+        }
+
+        .hero h1 {
+            font-size: 48px;
+            margin-bottom: 20px;
+            line-height: 1.2;
+        }
+
+        .hero p {
+            font-size: 20px;
+            max-width: 700px;
+            margin: 0 auto 30px;
+            opacity: 0.9;
+            line-height: 1.6;
+        }
+
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+            margin-bottom: 60px;
+        }
+
+        .feature-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            padding: 25px;
+            box-shadow: var(--shadow);
+            transition: transform 0.3s;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .feature-icon {
+            font-size: 40px;
+            margin-bottom: 20px;
+            color: var(--accent);
+        }
+
+        .feature-card h3 {
+            font-size: 22px;
+            margin-bottom: 15px;
+        }
+
+        .feature-card p {
+            opacity: 0.8;
+            line-height: 1.5;
+        }
+
+        .screens {
+            margin-bottom: 60px;
+        }
+
+        .screens h2 {
+            text-align: center;
+            margin-bottom: 40px;
+            font-size: 36px;
+        }
+
+        .screen-container {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            flex-wrap: wrap;
+        }
+
+        .screen {
+            width: 280px;
+            height: 500px;
+            background: var(--card-bg);
+            backdrop-filter: blur(10px);
+            border-radius: 40px;
+            padding: 25px 15px;
+            box-shadow: var(--shadow);
+            overflow: hidden;
+            position: relative;
+        }
+
+        .screen-header {
+            text-align: center;
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+
+        .screen-content {
+            height: calc(100% - 50px);
+            overflow-y: auto;
+        }
+
+        .day-selector {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+
+        .day {
+            text-align: center;
+            padding: 8px;
+            border-radius: 12px;
+            flex: 1;
+            margin: 0 3px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .day.active {
+            background: var(--accent);
+        }
+
+        .schedule-item {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 12px;
+            margin-bottom: 10px;
+        }
+
+        .schedule-time {
+            font-size: 12px;
+            opacity: 0.7;
+            margin-bottom: 5px;
+        }
+
+        .schedule-title {
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .schedule-desc {
+            font-size: 14px;
+            opacity: 0.8;
+        }
+
+        .event {
+            display: flex;
+            align-items: center;
+            padding: 12px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            margin-bottom: 10px;
+        }
+
+        .event-time {
+            min-width: 60px;
+            font-weight: 600;
+            margin-right: 15px;
+        }
+
+        .event-details {
+            flex: 1;
+        }
+
+        .event-title {
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .ai-assistant {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            width: 50px;
+            height: 50px;
+            background: var(--accent);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: var(--shadow);
+        }
+
+        .ai-icon {
+            font-size: 24px;
+        }
+
+        .cta {
+            text-align: center;
+            padding: 60px 0;
+        }
+
+        .cta h2 {
+            font-size: 36px;
+            margin-bottom: 20px;
+        }
+
+        .cta p {
+            max-width: 600px;
+            margin: 0 auto 30px;
+            font-size: 18px;
+            opacity: 0.9;
+            line-height: 1.6;
+        }
+
+        footer {
+            text-align: center;
+            padding: 30px 0;
+            margin-top: 40px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 36px;
+            }
+            
+            nav ul {
+                display: none;
+            }
+            
+            .screen-container {
+                flex-direction: column;
+                align-items: center;
+            }
+        }
+    </style>
 </head>
 <body>
-  <div class="login-box">
-    <h2>Logga in</h2>
-    <input type="text" placeholder="Användarnamn">
-    <input type="password" placeholder="Lösenord">
-    <div class="remember">
-      <input type="checkbox" id="remember">
-      <label for="remember">Kom ihåg mig</label>
+    <div class="container">
+        <header>
+            <div class="logo">
+                <span class="logo-icon">📅</span>
+                MittSchema
+            </div>
+            <nav>
+                <ul>
+                    <li><a href="#">Hem</a></li>
+                    <li><a href="#">Funktioner</a></li>
+                    <li><a href="#">Om</a></li>
+                    <li><a href="#">Kontakt</a></li>
+                </ul>
+            </nav>
+            <button class="btn">Logga in</button>
+        </header>
+
+        <section class="hero">
+            <h1>Din schemaläggning, förenklad</h1>
+            <p>MittSchema samlar ditt schema, läxor, prov och påminnelser på ett ställe. Perfekt för elever i grundskola, gymnasiet och SFI.</p>
+            <button class="btn">Kom igång</button>
+            <button class="btn btn-outline">Läs mer</button>
+        </section>
+
+        <section class="features">
+            <div class="feature-card">
+                <div class="feature-icon">📸</div>
+                <h3>Ladda upp schemabilder</h3>
+                <p>Ta en skärmbild av ditt schema och ladda upp det. Visa det i en snygg layout när du vill.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">🔔</div>
+                <h3>Påminnelser & händelser</h3>
+                <p>Lägg till prov, läxor och personliga händelser. Få notiser precis när du behöver dem.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">🤖</div>
+                <h3>AI-assistent</h3>
+                <p>Skriv "prov i matte onsdag 10:30" så lägger appen till det automatiskt i ditt schema.</p>
+            </div>
+        </section>
+
+        <section class="screens">
+            <h2>Så här fungerar det</h2>
+            <div class="screen-container">
+                <div class="screen">
+                    <div class="screen-header">Veckoschema</div>
+                    <div class="screen-content">
+                        <div class="day-selector">
+                            <div class="day">Mån</div>
+                            <div class="day">Tis</div>
+                            <div class="day active">Ons</div>
+                            <div class="day">Tor</div>
+                            <div class="day">Fre</div>
+                        </div>
+                        <div class="schedule-item">
+                            <div class="schedule-time">08:00 - 09:30</div>
+                            <div class="schedule-title">Matematik</div>
+                            <div class="schedule-desc">Sal B203</div>
+                        </div>
+                        <div class="schedule-item">
+                            <div class="schedule-time">10:00 - 11:30</div>
+                            <div class="schedule-title">Svenska</div>
+                            <div class="schedule-desc">Sal A102</div>
+                        </div>
+                        <div class="schedule-item">
+                            <div class="schedule-time">12:30 - 14:00</div>
+                            <div class="schedule-title">Idrott</div>
+                            <div class="schedule-desc">Idrottshall</div>
+                        </div>
+                        <div class="schedule-item">
+                            <div class="schedule-time">14:30 - 15:30</div>
+                            <div class="schedule-title">Studietid</div>
+                            <div class="schedule-desc">Biblioteket</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="screen">
+                    <div class="screen-header">Kommande händelser</div>
+                    <div class="screen-content">
+                        <div class="event">
+                            <div class="event-time">15:30</div>
+                            <div class="event-details">
+                                <div class="event-title">Läxa matematik</div>
+                                <div class="event-desc">Uppgift 12-25</div>
+                            </div>
+                        </div>
+                        <div class="event">
+                            <div class="event-time">Imorgon</div>
+                            <div class="event-details">
+                                <div class="event-title">Prov i historia</div>
+                                <div class="event-desc">Kapitel 4-5</div>
+                            </div>
+                        </div>
+                        <div class="event">
+                            <div class="event-time">Fre</div>
+                            <div class="event-details">
+                                <div class="event-title">Inlämning uppsats</div>
+                                <div class="event-desc">Svenska B</div>
+                            </div>
+                        </div>
+                        <div class="event">
+                            <div class="event-time">15 Okt</div>
+                            <div class="event-details">
+                                <div class="event-title">Tandläkare</div>
+                                <div class="event-desc">14:30</div>
+                            </div>
+                        </div>
+                        <div class="event">
+                            <div class="event-time">20 Okt</div>
+                            <div class="event-details">
+                                <div class="event-title">Terminsstart</div>
+                                <div class="event-desc">Höstlovet slut</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="ai-assistant">
+                        <div class="ai-icon">+</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="cta">
+            <h2>Redo att komma igång?</h2>
+            <p>Skapa ett konto idag och få kontroll över ditt schema. Eller prova vår gästversion direkt i webbläsaren.</p>
+            <button class="btn">Skapa konto</button>
+            <button class="btn btn-outline">Fortsätt som gäst</button>
+        </section>
+
+        <footer>
+            <p>© 2023 MittSchema. Alla rättigheter förbehållna.</p>
+        </footer>
     </div>
-    <button>Logga in</button>
-    <div class="options">
-      <a href="#">Glömt lösenord?</a> | 
-      <a href="#">Skapa konto</a> | 
-      <a href="#">Gästinloggning</a>
-    </div>
-  </div>
+
+    <script>
+        // Enkel JavaScript för interaktion
+        document.addEventListener('DOMContentLoaded', function() {
+            // Dagväljare
+            const days = document.querySelectorAll('.day');
+            days.forEach(day => {
+                day.addEventListener('click', function() {
+                    days.forEach(d => d.classList.remove('active'));
+                    this.classList.add('active');
+                });
+            });
+
+            // Knappar för inloggning och registrering
+            const loginBtn = document.querySelector('.btn');
+            loginBtn.addEventListener('click', function() {
+                alert('Inloggningssida kommer att visas här!');
+            });
+
+            const signupBtn = document.querySelectorAll('.btn')[5];
+            signupBtn.addEventListener('click', function() {
+                alert('Registreringssida kommer att visas här!');
+            });
+
+            // AI-assistent knapp
+            const aiBtn = document.querySelector('.ai-assistant');
+            aiBtn.addEventListener('click', function() {
+                const userInput = prompt('Skriv din händelse (t.ex. "prov i matte onsdag 10:30"):');
+                if (userInput) {
+                    alert('Händelsen "' + userInput + '" har lagts till i ditt schema!');
+                }
+            });
+        });
+    </script>
 </body>
 </html>
