@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MittSchema - Logga in</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+            color: #fff;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .container {
+            width: 100%;
+            max-width: 420px;
+        }
+        
+        .logo {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .logo h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            letter-spacing: 1px;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+        }
+        
+        .logo p {
+            margin-top: 10px;
+            opacity: 0.8;
+        }
+        
+        .login-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+        }
+        
+        .input-group {
+            margin-bottom: 20px;
+        }
+        
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+        
+        .input-group input {
+            width: 100%;
+            padding: 14px;
+            border: none;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.9);
+            font-size: 16px;
+            color: #203a43;
+            transition: all 0.3s ease;
+        }
+        
+        .input-group input:focus {
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(30, 107, 255, 0.3);
+        }
+        
+        .remember-forgot {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
+        
+        .remember {
+            display: flex;
+            align-items: center;
+        }
+        
+        .remember input {
+            margin-right: 8px;
+        }
+        
+        .forgot-password {
+            color: #1E6BFF;
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+        
+        .forgot-password:hover {
+            color: #fff;
+            text-decoration: underline;
+        }
+        
+        .login-btn {
+            width: 100%;
+            padding: 14px;
+            background-color: #1E6BFF;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            margin-bottom: 20px;
+        }
+        
+        .login-btn:hover {
+            background-color: #0d5ae5;
+        }
+        
+        .separator {
+            text-align: center;
+            margin: 20px 0;
+            position: relative;
+        }
+        
+        .separator::before {
+            content: "";
+            position: absolute;
+            left: 0;
+            top: 50%;
+            width: 42%;
+            height: 1px;
+            background: rgba(255, 255, 255, 0.3);
+        }
+        
+        .separator::after {
+            content: "";
+            position: absolute;
+            right: 0;
+            top: 50%;
+            width: 42%;
+            height: 1px;
+            background: rgba(255, 255, 255, 0.3);
+        }
+        
+        .guest-btn {
+            width: 100%;
+            padding: 14px;
+            background-color: transparent;
+            color: white;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .guest-btn:hover {
+            border-color: #1E6BFF;
+            background-color: rgba(30, 107, 255, 0.1);
+        }
+        
+        .create-account {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 14px;
+        }
+        
+        .create-account a {
+            color: #1E6BFF;
+            text-decoration: none;
+            font-weight: 600;
+            transition: color 0.3s;
+        }
+        
+        .create-account a:hover {
+            color: #fff;
+            text-decoration: underline;
+        }
+        
+        @media (max-width: 480px) {
+            .login-card {
+                padding: 20px;
+            }
+            
+            .logo h1 {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="logo">
+            <h1>MittSchema</h1>
+            <p>Din smarta schemaapp för skolan</p>
+        </div>
+        
+        <div class="login-card">
+            <div class="input-group">
+                <label for="username">Användarnamn</label>
+                <input type="text" id="username" placeholder="Ange ditt användarnamn">
+            </div>
+            
+            <div class="input-group">
+                <label for="password">Lösenord</label>
+                <input type="password" id="password" placeholder="Ange ditt lösenord">
+            </div>
+            
+            <div class="remember-forgot">
+                <div class="remember">
+                    <input type="checkbox" id="remember">
+                    <label for="remember">Kom ihåg mig</label>
+                </div>
+                <a href="#" class="forgot-password">Glömt lösenord?</a>
+            </div>
+            
+            <button class="login-btn">Logga in</button>
+            
+            <div class="separator">eller</div>
+            
+            <button class="guest-btn">Fortsätt som gäst</button>
+            
+            <div class="create-account">
+                Har du inget konto? <a href="#">Skapa konto</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const loginBtn = document.querySelector('.login-btn');
+            const guestBtn = document.querySelector('.guest-btn');
+            
+            loginBtn.addEventListener('click', function() {
+                const username = document.getElementById('username').value;
+                const password = document.getElementById('password').value;
+                
+                if (!username || !password) {
+                    alert('Vänligen fyll i både användarnamn och lösenord');
+                    return;
+                }
+                
+                alert('Inloggning lyckades! Välkommen till MittSchema.');
+                // Här skulle vi normalt omdirigera till huvudskärmen
+            });
+            
+            guestBtn.addEventListener('click', function() {
+                alert('Du fortsätter som gäst. Dina data sparas endast lokalt.');
+                // Här skulle vi normalt omdirigera till huvudskärmen i gästläge
+            });
+        });
+    </script>
+</body>
+</html>
