@@ -1,300 +1,81 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html lang="ar">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>آلة حاسبة متطورة</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-        
-        body {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            background: linear-gradient(135deg, #0a1929, #132542);
-            color: white;
-            padding: 20px;
-        }
-        
-        .calculator {
-            width: 340px;
-            background: rgba(13, 27, 42, 0.95);
-            border-radius: 24px;
-            padding: 24px;
-            box-shadow: 0 12px 35px rgba(0, 0, 0, 0.6);
-            border: 1px solid rgba(66, 90, 128, 0.6);
-        }
-        
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 15px;
-        }
-        
-        .title {
-            font-size: 18px;
-            font-weight: 600;
-            color: #4cc9f0;
-        }
-        
-        .theme-toggle {
-            background: rgba(65, 90, 119, 0.7);
-            border: none;
-            width: 45px;
-            height: 25px;
-            border-radius: 15px;
-            display: flex;
-            align-items: center;
-            padding: 0 3px;
-            cursor: pointer;
-            transition: background 0.3s;
-        }
-        
-        .theme-toggle span {
-            width: 19px;
-            height: 19px;
-            border-radius: 50%;
-            background: #4cc9f0;
-            transition: transform 0.3s;
-        }
-        
-        .display {
-            background: rgba(25, 40, 60, 0.7);
-            border-radius: 16px;
-            padding: 20px;
-            margin-bottom: 25px;
-            text-align: left;
-            height: 120px;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            overflow: hidden;
-            border: 1px solid rgba(76, 201, 240, 0.2);
-            box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.3);
-        }
-        
-        .previous-operand {
-            font-size: 18px;
-            color: rgba(255, 255, 255, 0.7);
-            min-height: 25px;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-        
-        .current-operand {
-            font-size: 36px;
-            font-weight: bold;
-            color: white;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            text-align: right;
-            letter-spacing: 1px;
-        }
-        
-        .buttons {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            grid-gap: 14px;
-        }
-        
-        button {
-            border: none;
-            outline: none;
-            padding: 18px;
-            border-radius: 16px;
-            font-size: 22px;
-            cursor: pointer;
-            transition: all 0.2s;
-            color: white;
-            box-shadow: 0 5px 12px rgba(0, 0, 0, 0.25);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            position: relative;
-            overflow: hidden;
-        }
-        
-        button::after {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(255, 255, 255, 0.1);
-            opacity: 0;
-            transition: opacity 0.2s;
-        }
-        
-        button:active::after {
-            opacity: 1;
-        }
-        
-        .number {
-            background: linear-gradient(145deg, #2a4b78, #1e3a5f);
-            font-weight: 500;
-        }
-        
-        .number:active {
-            background: linear-gradient(145deg, #1e3a5f, #2a4b78);
-        }
-        
-        .operator {
-            background: linear-gradient(145deg, #4361ee, #3a56d4);
-            font-weight: 600;
-        }
-        
-        .operator:active {
-            background: linear-gradient(145deg, #3a56d4, #4361ee);
-        }
-        
-        .equals {
-            background: linear-gradient(145deg, #4cc9f0, #3ab0d4);
-            grid-column: span 2;
-            font-weight: 700;
-            font-size: 24px;
-        }
-        
-        .equals:active {
-            background: linear-gradient(145deg, #3ab0d4, #4cc9f0);
-        }
-        
-        .clear, .delete {
-            background: linear-gradient(145deg, #e63946, #c1121f);
-            font-weight: 600;
-        }
-        
-        .clear:active, .delete:active {
-            background: linear-gradient(145deg, #c1121f, #e63946);
-        }
-        
-        .zero {
-            grid-column: span 2;
-        }
-        
-        .footer {
-            text-align: center;
-            margin-top: 20px;
-            font-size: 13px;
-            color: rgba(255, 255, 255, 0.5);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 5px;
-        }
-        
-        .mode-indicator {
-            display: inline-flex;
-            align-items: center;
-            gap: 5px;
-            background: rgba(76, 201, 240, 0.2);
-            padding: 4px 10px;
-            border-radius: 10px;
-        }
-        
-        /* تأثيرات إضافية للجمال */
-        .calculator::before {
-            content: '';
-            position: absolute;
-            top: -10px;
-            left: -10px;
-            right: -10px;
-            bottom: -10px;
-            background: linear-gradient(45deg, #4cc9f0, #3a56d4, #e63946);
-            z-index: -1;
-            border-radius: 30px;
-            opacity: 0.1;
-            filter: blur(15px);
-        }
-        
-        /* تأثيرات عند التمرير */
-        button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 7px 14px rgba(0, 0, 0, 0.3);
-        }
-        
-        button:active {
-            transform: translateY(1px);
-            box-shadow: 0 3px 6px rgba(0, 0, 0, 0.2);
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>أهلا وسهلا فيكم</title>
+<style>
+    body {
+        font-family: 'Cairo', sans-serif;
+        background-color: #1E1E1E;
+        color: #f5f5f5;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        margin: 0;
+    }
+
+    .container {
+        background: #2c2c2c;
+        padding: 30px 50px;
+        border-radius: 20px;
+        text-align: center;
+        box-shadow: 0 0 20px rgba(0,0,0,0.5);
+    }
+
+    h1 {
+        font-family: 'Scheherazade', serif;
+        color: #FFD700;
+        margin-bottom: 30px;
+    }
+
+    select {
+        padding: 10px 20px;
+        font-size: 16px;
+        border-radius: 10px;
+        border: none;
+        margin-bottom: 20px;
+        background-color: #444;
+        color: #fff;
+    }
+
+    .greeting {
+        font-size: 24px;
+        margin-top: 20px;
+        color: #FFA500;
+    }
+</style>
 </head>
 <body>
-    <div class="calculator">
-        <div class="header">
-            <div class="title">آلة حاسبة متطورة</div>
-            <div class="theme-toggle">
-                <span></span>
-            </div>
-        </div>
-        
-        <div class="display">
-            <div class="previous-operand"></div>
-            <div class="current-operand">0</div>
-        </div>
-        
-        <div class="buttons">
-            <button class="clear">C</button>
-            <button class="delete"><i class="fas fa-backspace"></i></button>
-            <button class="operator">%</button>
-            <button class="operator">÷</button>
-            
-            <button class="number">7</button>
-            <button class="number">8</button>
-            <button class="number">9</button>
-            <button class="operator">×</button>
-            
-            <button class="number">4</button>
-            <button class="number">5</button>
-            <button class="number">6</button>
-            <button class="operator">-</button>
-            
-            <button class="number">1</button>
-            <button class="number">2</button>
-            <button class="number">3</button>
-            <button class="operator">+</button>
-            
-            <button class="number zero">0</button>
-            <button class="number">.</button>
-            <button class="equals">=</button>
-        </div>
-        
-        <div class="footer">
-            <span class="mode-indicator">
-                <i class="fas fa-moon"></i> الوضع الليلي
-            </span>
-        </div>
-    </div>
+<div class="container">
+    <h1>أهلا وسهلا فيكم ببيت Mitt</h1>
+    
+    <select id="languageSelector">
+        <option value="ar">العربية</option>
+        <option value="en">English</option>
+        <option value="fr">Français</option>
+        <option value="es">Español</option>
+    </select>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const displayPrevious = document.querySelector('.previous-operand');
-            const displayCurrent = document.querySelector('.current-operand');
-            const buttons = document.querySelectorAll('button');
-            const themeToggle = document.querySelector('.theme-toggle');
-            let currentOperand = '';
-            let previousOperand = '';
-            let operation = undefined;
-            
-            // تحديث الشاشة
-            function updateDisplay() {
-                displayCurrent.innerText = currentOperand;
-                if (operation != null) {
-                    displayPrevious.innerText = `${previousOperand} ${getOperationSymbol(operation)}`;
-                } else {
-                    displayPrevious.innerText = previousOperand;
-                }
-            }
-            
-            // إضافة رقم
-            function appendNumber(number) {
-                if (number === '.' && currentOperand.includes('.')) return;
-                if (currentOperand
+    <div class="greeting" id="greetingText">أهلا وسهلا فيك</div>
+</div>
+
+<script>
+    const greetings = {
+        ar: "أهلا وسهلا فيك",
+        en: "Welcome",
+        fr: "Bienvenue",
+        es: "Bienvenido"
+    };
+
+    const selector = document.getElementById('languageSelector');
+    const greetingText = document.getElementById('greetingText');
+
+    selector.addEventListener('change', () => {
+        const lang = selector.value;
+        greetingText.textContent = greetings[lang] || "أهلا وسهلا فيك";
+    });
+</script>
+</body>
+</html>
