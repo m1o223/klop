@@ -1,265 +1,388 @@
-<!DOCTYPE html>
-<html lang="sv">
+
+   <!DOCTYPE html>
+<html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MittSchema - Logga in</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <title>آلة حاسبة علمية - متوافقة مع سفاري</title>
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="apple-touch-icon" href="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTUwIiBoZWlnaHQ9IjE1MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48Y2lyY2xlIGN4PSI3NSIgY3k9Ijc1IiByPSI3MCIgZmlsbD0iIzM0OThkYiIvPjx0ZXh0IHg9IjUwIiB5PSI5MCIgZm9udC1mYW1pbHk9IkFyaWFsIiBmb250LXNpemU9IjQwIiBmaWxsPSJ3aGl0ZSIgPis8L3RleHQ+PC9zdmc+">
     <style>
         * {
+            box-sizing: border-box;
             margin: 0;
             padding: 0;
-            box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+            -webkit-user-select: none;
+            user-select: none;
         }
         
         body {
-            background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
-            color: #fff;
-            min-height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
             padding: 20px;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            -webkit-font-smoothing: antialiased;
         }
         
-        .container {
-            width: 100%;
-            max-width: 420px;
+        .calculator {
+            width: 350px;
+            background-color: #2c3e50;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            overflow: hidden;
+            -webkit-backface-visibility: hidden;
+            transform: translateZ(0);
         }
         
-        .logo {
-            text-align: center;
-            margin-bottom: 30px;
-        }
-        
-        .logo h1 {
-            font-size: 2.5rem;
-            font-weight: 700;
-            letter-spacing: 1px;
-            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
-        }
-        
-        .logo p {
-            margin-top: 10px;
-            opacity: 0.8;
-        }
-        
-        .login-card {
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
-            border-radius: 16px;
-            padding: 30px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
-            border: 1px solid rgba(255, 255, 255, 0.18);
-        }
-        
-        .input-group {
-            margin-bottom: 20px;
-        }
-        
-        .input-group label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: 500;
-        }
-        
-        .input-group input {
-            width: 100%;
-            padding: 14px;
-            border: none;
-            border-radius: 8px;
-            background: rgba(255, 255, 255, 0.9);
-            font-size: 16px;
-            color: #203a43;
-            transition: all 0.3s ease;
-        }
-        
-        .input-group input:focus {
-            outline: none;
-            box-shadow: 0 0 0 3px rgba(30, 107, 255, 0.3);
-        }
-        
-        .remember-forgot {
+        .header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 20px;
-            font-size: 14px;
+            padding: 15px 20px;
+            background-color: #1a252f;
+            color: white;
         }
         
-        .remember {
+        .header h1 {
+            font-size: 18px;
+            font-weight: 500;
+        }
+        
+        .theme-switch {
             display: flex;
             align-items: center;
-        }
-        
-        .remember input {
-            margin-right: 8px;
-        }
-        
-        .forgot-password {
-            color: #1E6BFF;
-            text-decoration: none;
-            transition: color 0.3s;
-        }
-        
-        .forgot-password:hover {
-            color: #fff;
-            text-decoration: underline;
-        }
-        
-        .login-btn {
-            width: 100%;
-            padding: 14px;
-            background-color: #1E6BFF;
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: background-color 0.3s;
-            margin-bottom: 20px;
-        }
-        
-        .login-btn:hover {
-            background-color: #0d5ae5;
-        }
-        
-        .separator {
-            text-align: center;
-            margin: 20px 0;
-            position: relative;
-        }
-        
-        .separator::before {
-            content: "";
-            position: absolute;
-            left: 0;
-            top: 50%;
-            width: 42%;
-            height: 1px;
-            background: rgba(255, 255, 255, 0.3);
-        }
-        
-        .separator::after {
-            content: "";
-            position: absolute;
-            right: 0;
-            top: 50%;
-            width: 42%;
-            height: 1px;
-            background: rgba(255, 255, 255, 0.3);
-        }
-        
-        .guest-btn {
-            width: 100%;
-            padding: 14px;
-            background-color: transparent;
-            color: white;
-            border: 2px solid rgba(255, 255, 255, 0.3);
-            border-radius: 8px;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-        
-        .guest-btn:hover {
-            border-color: #1E6BFF;
-            background-color: rgba(30, 107, 255, 0.1);
-        }
-        
-        .create-account {
-            text-align: center;
-            margin-top: 20px;
             font-size: 14px;
         }
         
-        .create-account a {
-            color: #1E6BFF;
-            text-decoration: none;
-            font-weight: 600;
-            transition: color 0.3s;
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 40px;
+            height: 20px;
+            margin-left: 10px;
         }
         
-        .create-account a:hover {
-            color: #fff;
-            text-decoration: underline;
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
         }
         
-        @media (max-width: 480px) {
-            .login-card {
-                padding: 20px;
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 34px;
+        }
+        
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 16px;
+            width: 16px;
+            left: 2px;
+            bottom: 2px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+        
+        input:checked + .slider {
+            background-color: #2196F3;
+        }
+        
+        input:checked + .slider:before {
+            transform: translateX(20px);
+        }
+        
+        .display {
+            padding: 20px;
+            text-align: left;
+            background-color: #34495e;
+            color: white;
+            font-size: 32px;
+            font-weight: 300;
+            min-height: 100px;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            overflow: hidden;
+            word-break: break-all;
+            -webkit-user-select: text;
+            user-select: text;
+        }
+        
+        .buttons {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 1px;
+            background-color: #1a252f;
+            touch-action: manipulation;
+        }
+        
+        button {
+            border: none;
+            padding: 15px 10px;
+            font-size: 18px;
+            cursor: pointer;
+            transition: all 0.2s;
+            background-color: #2c3e50;
+            color: white;
+            -webkit-touch-callout: none;
+        }
+        
+        button:hover, button:active {
+            background-color: #34495e;
+        }
+        
+        .operator {
+            background-color: #3498db;
+            font-weight: bold;
+        }
+        
+        .operator:hover, .operator:active {
+            background-color: #2980b9;
+        }
+        
+        .equals {
+            background-color: #e74c3c;
+            grid-column: span 2;
+        }
+        
+        .equals:hover, .equals:active {
+            background-color: #c0392b;
+        }
+        
+        .function {
+            background-color: #16a085;
+        }
+        
+        .function:hover, .function:active {
+            background-color: #1abc9c;
+        }
+        
+        .zero {
+            grid-column: span 2;
+        }
+        
+        .safari-tips {
+            margin-top: 20px;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            color: white;
+            font-size: 14px;
+            text-align: center;
+            backdrop-filter: blur(5px);
+        }
+        
+        .safari-tips h3 {
+            margin-bottom: 10px;
+        }
+        
+        @media (max-width: 400px) {
+            .calculator {
+                width: 100%;
             }
             
-            .logo h1 {
-                font-size: 2rem;
+            button {
+                padding: 18px 8px;
+                font-size: 16px;
+            }
+            
+            .display {
+                font-size: 28px;
+                min-height: 90px;
+            }
+        }
+        
+        /* تحسينات خاصة بسفاري */
+        @supports (-webkit-touch-callout: none) {
+            button {
+                padding: 18px 10px;
+            }
+            
+            .display {
+                font-size: 30px;
             }
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="logo">
-            <h1>MittSchema</h1>
-            <p>Din smarta schemaapp för skolan</p>
+    <div class="calculator">
+        <div class="header">
+            <h1>آلة حاسبة</h1>
+            <div class="theme-switch">
+                وضع الضوء
+                <label class="switch">
+                    <input type="checkbox" id="theme-toggle">
+                    <span class="slider"></span>
+                </label>
+            </div>
         </div>
         
-        <div class="login-card">
-            <div class="input-group">
-                <label for="username">Användarnamn</label>
-                <input type="text" id="username" placeholder="Ange ditt användarnamn">
-            </div>
+        <div class="display" id="display">0</div>
+        
+        <div class="buttons">
+            <button class="function" onclick="appendToDisplay('sin(')">sin</button>
+            <button class="function" onclick="appendToDisplay('cos(')">cos</button>
+            <button class="function" onclick="appendToDisplay('tan(')">tan</button>
+            <button class="function" onclick="appendToDisplay('log(')">log</button>
+            <button class="function" onclick="appendToDisplay('π')">π</button>
             
-            <div class="input-group">
-                <label for="password">Lösenord</label>
-                <input type="password" id="password" placeholder="Ange ditt lösenord">
-            </div>
+            <button class="function" onclick="appendToDisplay('e')">e</button>
+            <button onclick="appendToDisplay('(')">(</button>
+            <button onclick="appendToDisplay(')')">)</button>
+            <button class="operator" onclick="clearDisplay()">C</button>
+            <button class="operator" onclick="appendToDisplay('+')">+</button>
             
-            <div class="remember-forgot">
-                <div class="remember">
-                    <input type="checkbox" id="remember">
-                    <label for="remember">Kom ihåg mig</label>
-                </div>
-                <a href="#" class="forgot-password">Glömt lösenord?</a>
-            </div>
+            <button class="operator" onclick="appendToDisplay('*')">x</button>
+            <button class="operator" onclick="appendToDisplay('-')">-</button>
+            <button class="operator" onclick="appendToDisplay('/')">/</button>
+            <button class="operator" onclick="appendToDisplay('**')">^</button>
+            <button class="operator" onclick="appendToDisplay('Math.sqrt(')">√</button>
             
-            <button class="login-btn">Logga in</button>
+            <button onclick="appendToDisplay('7')">7</button>
+            <button onclick="appendToDisplay('8')">8</button>
+            <button onclick="appendToDisplay('9')">9</button>
+            <button class="equals" onclick="calculate()">=</button>
             
-            <div class="separator">eller</div>
+            <button onclick="appendToDisplay('4')">4</button>
+            <button onclick="appendToDisplay('5')">5</button>
+            <button onclick="appendToDisplay('6')">6</button>
+            <button onclick="appendToDisplay('0')">0</button>
             
-            <button class="guest-btn">Fortsätt som gäst</button>
-            
-            <div class="create-account">
-                Har du inget konto? <a href="#">Skapa konto</a>
-            </div>
+            <button onclick="appendToDisplay('.')">.</button>
+            <button onclick="appendToDisplay('1')">1</button>
+            <button onclick="appendToDisplay('2')">2</button>
+            <button onclick="appendToDisplay('3')">3</button>
         </div>
     </div>
 
+    <div class="safari-tips">
+        <h3>نصائح للاستخدام على سفاري:</h3>
+        <p>يمكنك إضافة هذه الصفحة إلى شاشة الرئيسية للوصول السريع (اختر "إضافة إلى الشاشة الرئيسية" من قائمة المشاركة)</p>
+    </div>
+
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const loginBtn = document.querySelector('.login-btn');
-            const guestBtn = document.querySelector('.guest-btn');
+        const display = document.getElementById('display');
+        const themeToggle = document.getElementById('theme-toggle');
+        
+        // كشف إذا كان المتصفح هو سفاري
+        const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+        
+        if (isSafari) {
+            document.body.classList.add('safari-browser');
+            console.log("تم الكشف عن متصفح سفاري، تم تطبيق التحسينات الخاصة");
+        }
+        
+        // تبديل وضع السطوع
+        themeToggle.addEventListener('change', function() {
+            document.body.classList.toggle('light-mode');
+            document.querySelector('.calculator').classList.toggle('light-mode');
+            document.querySelector('.header').classList.toggle('light-mode');
+            document.querySelector('.display').classList.toggle('light-mode');
             
-            loginBtn.addEventListener('click', function() {
-                const username = document.getElementById('username').value;
-                const password = document.getElementById('password').value;
-                
-                if (!username || !password) {
-                    alert('Vänligen fyll i både användarnamn och lösenord');
-                    return;
-                }
-                
-                alert('Inloggning lyckades! Välkommen till MittSchema.');
-                // Här skulle vi normalt omdirigera till huvudskärmen
-            });
-            
-            guestBtn.addEventListener('click', function() {
-                alert('Du fortsätter som gäst. Dina data sparas endast lokalt.');
-                // Här skulle vi normalt omdirigera till huvudskärmen i gästläge
+            const buttons = document.querySelectorAll('button');
+            buttons.forEach(button => {
+                button.classList.toggle('light-mode');
             });
         });
+        
+        // إضافة محتوى إلى الشاشة
+        function appendToDisplay(value) {
+            if (display.innerText === '0' || display.innerText === 'Error') {
+                display.innerText = value;
+            } else {
+                display.innerText += value;
+            }
+            
+            // تحسين الأداء على سفاري
+            if (isSafari) {
+                display.scrollLeft = display.scrollWidth;
+            }
+        }
+        
+        // مسح الشاشة
+        function clearDisplay() {
+            display.innerText = '0';
+        }
+        
+        // إجراء العمليات الحسابية
+        function calculate() {
+            try {
+                let expression = display.innerText;
+                
+                // استبدال الثوابت الرياضية
+                expression = expression.replace(/π/g, 'Math.PI');
+                expression = expression.replace(/e/g, 'Math.E');
+                
+                // معالجة الدوال المثلثية واللوغاريتمية
+                expression = expression.replace(/sin\(/g, 'Math.sin(');
+                expression = expression.replace(/cos\(/g, 'Math.cos(');
+                expression = expression.replace(/tan\(/g, 'Math.tan(');
+                expression = expression.replace(/log\(/g, 'Math.log10(');
+                expression = expression.replace(/√\(/g, 'Math.sqrt(');
+                
+                // تقييم التعبير الرياضي
+                const result = eval(expression);
+                
+                // عرض النتيجة مع تقريب الأعداد الكبيرة
+                if (result.toString().length > 10) {
+                    display.innerText = Number(result.toFixed(8)).toString();
+                } else {
+                    display.innerText = result;
+                }
+            } catch (error) {
+                display.innerText = 'Error';
+                
+                // اهتزاز عند الخطأ (تجربة مستخدم أفضل)
+                if (isSafari) {
+                    display.classList.add('error');
+                    setTimeout(() => {
+                        display.classList.remove('error');
+                    }, 300);
+                }
+            }
+        }
+        
+        // إضافة دعم لوحة المفاتيح
+        document.addEventListener('keydown', function(event) {
+            if (/[0-9]/.test(event.key)) {
+                appendToDisplay(event.key);
+            } else if (event.key === '+' || event.key === '-' || event.key === '*' || event.key === '/') {
+                appendToDisplay(event.key);
+            } else if (event.key === '.') {
+                appendToDisplay('.');
+            } else if (event.key === 'Enter' || event.key === '=') {
+                calculate();
+            } else if (event.key === 'Escape' || event.key === 'c' || event.key === 'C') {
+                clearDisplay();
+            } else if (event.key === 'Backspace') {
+                if (display.innerText.length > 1) {
+                    display.innerText = display.innerText.slice(0, -1);
+                } else {
+                    display.innerText = '0';
+                }
+            }
+        });
+        
+        // منع تكبير الصفحة على iOS
+        document.addEventListener('touchmove', function (event) {
+            if (event.scale !== 1) {
+                event.preventDefault();
+            }
+        }, { passive: false });
     </script>
 </body>
 </html>
