@@ -1,21 +1,15 @@
-
-   <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>آلة حاسبة علمية - متوافقة مع سفاري</title>
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <link rel="apple-touch-icon" href="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTUwIiBoZWlnaHQ9IjE1MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48Y2lyY2xlIGN4PSI3NSIgY3k9Ijc1IiByPSI3MCIgZmlsbD0iIzM0OThkYiIvPjx0ZXh0IHg9IjUwIiB5PSI5MCIgZm9udC1mYW1pbHk9IkFyaWFsIiBmb250LXNpemU9IjQwIiBmaWxsPSJ3aGl0ZSIgPis8L3RleHQ+PC9zdmc+">
+    <title>آلة حاسبة</title>
     <style>
         * {
-            box-sizing: border-box;
             margin: 0;
             padding: 0;
-            -webkit-tap-highlight-color: transparent;
-            -webkit-user-select: none;
-            user-select: none;
+            box-sizing: border-box;
+            font-family: 'Arial', sans-serif;
         }
         
         body {
@@ -23,366 +17,295 @@
             justify-content: center;
             align-items: center;
             min-height: 100vh;
-            background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
-            padding: 20px;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-            -webkit-font-smoothing: antialiased;
+            background: linear-gradient(135deg, #0d1b2a, #1b263b);
+            color: white;
         }
         
         .calculator {
-            width: 350px;
-            background-color: #2c3e50;
+            width: 320px;
+            background: rgba(13, 27, 42, 0.9);
             border-radius: 20px;
+            padding: 20px;
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-            overflow: hidden;
-            -webkit-backface-visibility: hidden;
-            transform: translateZ(0);
-        }
-        
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 15px 20px;
-            background-color: #1a252f;
-            color: white;
-        }
-        
-        .header h1 {
-            font-size: 18px;
-            font-weight: 500;
-        }
-        
-        .theme-switch {
-            display: flex;
-            align-items: center;
-            font-size: 14px;
-        }
-        
-        .switch {
-            position: relative;
-            display: inline-block;
-            width: 40px;
-            height: 20px;
-            margin-left: 10px;
-        }
-        
-        .switch input {
-            opacity: 0;
-            width: 0;
-            height: 0;
-        }
-        
-        .slider {
-            position: absolute;
-            cursor: pointer;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-color: #ccc;
-            transition: .4s;
-            border-radius: 34px;
-        }
-        
-        .slider:before {
-            position: absolute;
-            content: "";
-            height: 16px;
-            width: 16px;
-            left: 2px;
-            bottom: 2px;
-            background-color: white;
-            transition: .4s;
-            border-radius: 50%;
-        }
-        
-        input:checked + .slider {
-            background-color: #2196F3;
-        }
-        
-        input:checked + .slider:before {
-            transform: translateX(20px);
+            border: 1px solid rgba(66, 90, 128, 0.5);
         }
         
         .display {
+            background: rgba(224, 225, 221, 0.1);
+            border-radius: 10px;
             padding: 20px;
+            margin-bottom: 20px;
             text-align: left;
-            background-color: #34495e;
-            color: white;
-            font-size: 32px;
-            font-weight: 300;
-            min-height: 100px;
+            height: 100px;
             display: flex;
-            align-items: center;
-            justify-content: flex-end;
+            flex-direction: column;
+            justify-content: space-between;
             overflow: hidden;
-            word-break: break-all;
-            -webkit-user-select: text;
-            user-select: text;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .previous-operand {
+            font-size: 18px;
+            color: rgba(255, 255, 255, 0.7);
+            min-height: 25px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        .current-operand {
+            font-size: 32px;
+            font-weight: bold;
+            color: white;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
         
         .buttons {
             display: grid;
-            grid-template-columns: repeat(5, 1fr);
-            gap: 1px;
-            background-color: #1a252f;
-            touch-action: manipulation;
+            grid-template-columns: repeat(4, 1fr);
+            grid-gap: 12px;
         }
         
         button {
             border: none;
-            padding: 15px 10px;
-            font-size: 18px;
+            outline: none;
+            padding: 16px;
+            border-radius: 12px;
+            font-size: 20px;
             cursor: pointer;
             transition: all 0.2s;
-            background-color: #2c3e50;
+            background: rgba(41, 61, 90, 0.8);
             color: white;
-            -webkit-touch-callout: none;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
         }
         
-        button:hover, button:active {
-            background-color: #34495e;
+        button:active {
+            transform: scale(0.95);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
         }
         
         .operator {
-            background-color: #3498db;
+            background: rgba(65, 90, 119, 0.9);
             font-weight: bold;
         }
         
-        .operator:hover, .operator:active {
-            background-color: #2980b9;
-        }
-        
         .equals {
-            background-color: #e74c3c;
+            background: linear-gradient(to bottom, #4cc9f0, #4361ee);
             grid-column: span 2;
         }
         
-        .equals:hover, .equals:active {
-            background-color: #c0392b;
-        }
-        
-        .function {
-            background-color: #16a085;
-        }
-        
-        .function:hover, .function:active {
-            background-color: #1abc9c;
+        .clear, .delete {
+            background: rgba(230, 57, 70, 0.8);
         }
         
         .zero {
             grid-column: span 2;
         }
         
-        .safari-tips {
-            margin-top: 20px;
-            padding: 15px;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 10px;
-            color: white;
-            font-size: 14px;
+        .footer {
             text-align: center;
-            backdrop-filter: blur(5px);
-        }
-        
-        .safari-tips h3 {
-            margin-bottom: 10px;
-        }
-        
-        @media (max-width: 400px) {
-            .calculator {
-                width: 100%;
-            }
-            
-            button {
-                padding: 18px 8px;
-                font-size: 16px;
-            }
-            
-            .display {
-                font-size: 28px;
-                min-height: 90px;
-            }
-        }
-        
-        /* تحسينات خاصة بسفاري */
-        @supports (-webkit-touch-callout: none) {
-            button {
-                padding: 18px 10px;
-            }
-            
-            .display {
-                font-size: 30px;
-            }
+            margin-top: 15px;
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.5);
         }
     </style>
 </head>
 <body>
     <div class="calculator">
-        <div class="header">
-            <h1>آلة حاسبة</h1>
-            <div class="theme-switch">
-                وضع الضوء
-                <label class="switch">
-                    <input type="checkbox" id="theme-toggle">
-                    <span class="slider"></span>
-                </label>
-            </div>
+        <div class="display">
+            <div class="previous-operand"></div>
+            <div class="current-operand">0</div>
         </div>
-        
-        <div class="display" id="display">0</div>
-        
         <div class="buttons">
-            <button class="function" onclick="appendToDisplay('sin(')">sin</button>
-            <button class="function" onclick="appendToDisplay('cos(')">cos</button>
-            <button class="function" onclick="appendToDisplay('tan(')">tan</button>
-            <button class="function" onclick="appendToDisplay('log(')">log</button>
-            <button class="function" onclick="appendToDisplay('π')">π</button>
+            <button class="clear">C</button>
+            <button class="delete">⌫</button>
+            <button class="operator">%</button>
+            <button class="operator">÷</button>
             
-            <button class="function" onclick="appendToDisplay('e')">e</button>
-            <button onclick="appendToDisplay('(')">(</button>
-            <button onclick="appendToDisplay(')')">)</button>
-            <button class="operator" onclick="clearDisplay()">C</button>
-            <button class="operator" onclick="appendToDisplay('+')">+</button>
+            <button class="number">7</button>
+            <button class="number">8</button>
+            <button class="number">9</button>
+            <button class="operator">×</button>
             
-            <button class="operator" onclick="appendToDisplay('*')">x</button>
-            <button class="operator" onclick="appendToDisplay('-')">-</button>
-            <button class="operator" onclick="appendToDisplay('/')">/</button>
-            <button class="operator" onclick="appendToDisplay('**')">^</button>
-            <button class="operator" onclick="appendToDisplay('Math.sqrt(')">√</button>
+            <button class="number">4</button>
+            <button class="number">5</button>
+            <button class="number">6</button>
+            <button class="operator">-</button>
             
-            <button onclick="appendToDisplay('7')">7</button>
-            <button onclick="appendToDisplay('8')">8</button>
-            <button onclick="appendToDisplay('9')">9</button>
-            <button class="equals" onclick="calculate()">=</button>
+            <button class="number">1</button>
+            <button class="number">2</button>
+            <button class="number">3</button>
+            <button class="operator">+</button>
             
-            <button onclick="appendToDisplay('4')">4</button>
-            <button onclick="appendToDisplay('5')">5</button>
-            <button onclick="appendToDisplay('6')">6</button>
-            <button onclick="appendToDisplay('0')">0</button>
-            
-            <button onclick="appendToDisplay('.')">.</button>
-            <button onclick="appendToDisplay('1')">1</button>
-            <button onclick="appendToDisplay('2')">2</button>
-            <button onclick="appendToDisplay('3')">3</button>
+            <button class="number zero">0</button>
+            <button class="number">.</button>
+            <button class="equals">=</button>
         </div>
-    </div>
-
-    <div class="safari-tips">
-        <h3>نصائح للاستخدام على سفاري:</h3>
-        <p>يمكنك إضافة هذه الصفحة إلى شاشة الرئيسية للوصول السريع (اختر "إضافة إلى الشاشة الرئيسية" من قائمة المشاركة)</p>
+        <div class="footer">آلة حاسبة بتصميم أزرق غامق</div>
     </div>
 
     <script>
-        const display = document.getElementById('display');
-        const themeToggle = document.getElementById('theme-toggle');
-        
-        // كشف إذا كان المتصفح هو سفاري
-        const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
-        
-        if (isSafari) {
-            document.body.classList.add('safari-browser');
-            console.log("تم الكشف عن متصفح سفاري، تم تطبيق التحسينات الخاصة");
-        }
-        
-        // تبديل وضع السطوع
-        themeToggle.addEventListener('change', function() {
-            document.body.classList.toggle('light-mode');
-            document.querySelector('.calculator').classList.toggle('light-mode');
-            document.querySelector('.header').classList.toggle('light-mode');
-            document.querySelector('.display').classList.toggle('light-mode');
-            
+        document.addEventListener('DOMContentLoaded', function() {
+            const displayPrevious = document.querySelector('.previous-operand');
+            const displayCurrent = document.querySelector('.current-operand');
             const buttons = document.querySelectorAll('button');
+            let currentOperand = '';
+            let previousOperand = '';
+            let operation = undefined;
+            
+            // تحديث الشاشة
+            function updateDisplay() {
+                displayCurrent.innerText = currentOperand;
+                if (operation != null) {
+                    displayPrevious.innerText = `${previousOperand} ${getOperationSymbol(operation)}`;
+                } else {
+                    displayPrevious.innerText = previousOperand;
+                }
+            }
+            
+            // إضافة رقم
+            function appendNumber(number) {
+                if (number === '.' && currentOperand.includes('.')) return;
+                if (currentOperand === '0' && number !== '.') {
+                    currentOperand = number;
+                } else {
+                    currentOperand = currentOperand.toString() + number.toString();
+                }
+            }
+            
+            // اختيار العملية
+            function chooseOperation(op) {
+                if (currentOperand === '') return;
+                if (previousOperand !== '') {
+                    calculate();
+                }
+                operation = op;
+                previousOperand = currentOperand;
+                currentOperand = '';
+            }
+            
+            // إجراء العمليات الحسابية
+            function calculate() {
+                let computation;
+                const prev = parseFloat(previousOperand);
+                const current = parseFloat(currentOperand);
+                if (isNaN(prev) || isNaN(current)) return;
+                
+                switch (operation) {
+                    case '+':
+                        computation = prev + current;
+                        break;
+                    case '-':
+                        computation = prev - current;
+                        break;
+                    case '×':
+                        computation = prev * current;
+                        break;
+                    case '÷':
+                        if (current === 0) {
+                            computation = 'خطأ: القسمة على صفر';
+                        } else {
+                            computation = prev / current;
+                        }
+                        break;
+                    case '%':
+                        computation = prev % current;
+                        break;
+                    default:
+                        return;
+                }
+                
+                if (typeof computation === 'string') {
+                    currentOperand = computation;
+                } else {
+                    currentOperand = computation;
+                    // تقليل الأرقام العشرية الطويلة
+                    if (currentOperand.toString().length > 10) {
+                        currentOperand = parseFloat(currentOperand.toFixed(8));
+                    }
+                }
+                operation = undefined;
+                previousOperand = '';
+            }
+            
+            // مسح كل شيء
+            function clear() {
+                currentOperand = '0';
+                previousOperand = '';
+                operation = undefined;
+            }
+            
+            // مسح رقم واحد
+            function deleteNumber() {
+                currentOperand = currentOperand.toString().slice(0, -1);
+                if (currentOperand === '') {
+                    currentOperand = '0';
+                }
+            }
+            
+            // الحصول على رمز العملية للعرض
+            function getOperationSymbol(op) {
+                switch (op) {
+                    case '+': return '+';
+                    case '-': return '-';
+                    case '×': return '×';
+                    case '÷': return '÷';
+                    case '%': return '%';
+                    default: return '';
+                }
+            }
+            
+            // إضافة أحداث النقر للأزرار
             buttons.forEach(button => {
-                button.classList.toggle('light-mode');
+                button.addEventListener('click', () => {
+                    if (button.classList.contains('number')) {
+                        appendNumber(button.innerText);
+                        updateDisplay();
+                    } else if (button.classList.contains('operator')) {
+                        chooseOperation(button.innerText);
+                        updateDisplay();
+                    } else if (button.classList.contains('equals')) {
+                        calculate();
+                        updateDisplay();
+                    } else if (button.classList.contains('clear')) {
+                        clear();
+                        updateDisplay();
+                    } else if (button.classList.contains('delete')) {
+                        deleteNumber();
+                        updateDisplay();
+                    }
+                });
+            });
+            
+            // دعم لوحة المفاتيح
+            document.addEventListener('keydown', function (event) {
+                if (/[0-9]/.test(event.key)) {
+                    appendNumber(event.key);
+                    updateDisplay();
+                } else if (event.key === '.') {
+                    appendNumber('.');
+                    updateDisplay();
+                } else if (event.key === '+' || event.key === '-' || event.key === '*') {
+                    let op = event.key;
+                    if (op === '*') op = '×';
+                    chooseOperation(op);
+                    updateDisplay();
+                } else if (event.key === '/') {
+                    chooseOperation('÷');
+                    updateDisplay();
+                } else if (event.key === 'Enter' || event.key === '=') {
+                    event.preventDefault();
+                    calculate();
+                    updateDisplay();
+                } else if (event.key === 'Backspace') {
+                    deleteNumber();
+                    updateDisplay();
+                } else if (event.key === 'Escape') {
+                    clear();
+                    updateDisplay();
+                }
             });
         });
-        
-        // إضافة محتوى إلى الشاشة
-        function appendToDisplay(value) {
-            if (display.innerText === '0' || display.innerText === 'Error') {
-                display.innerText = value;
-            } else {
-                display.innerText += value;
-            }
-            
-            // تحسين الأداء على سفاري
-            if (isSafari) {
-                display.scrollLeft = display.scrollWidth;
-            }
-        }
-        
-        // مسح الشاشة
-        function clearDisplay() {
-            display.innerText = '0';
-        }
-        
-        // إجراء العمليات الحسابية
-        function calculate() {
-            try {
-                let expression = display.innerText;
-                
-                // استبدال الثوابت الرياضية
-                expression = expression.replace(/π/g, 'Math.PI');
-                expression = expression.replace(/e/g, 'Math.E');
-                
-                // معالجة الدوال المثلثية واللوغاريتمية
-                expression = expression.replace(/sin\(/g, 'Math.sin(');
-                expression = expression.replace(/cos\(/g, 'Math.cos(');
-                expression = expression.replace(/tan\(/g, 'Math.tan(');
-                expression = expression.replace(/log\(/g, 'Math.log10(');
-                expression = expression.replace(/√\(/g, 'Math.sqrt(');
-                
-                // تقييم التعبير الرياضي
-                const result = eval(expression);
-                
-                // عرض النتيجة مع تقريب الأعداد الكبيرة
-                if (result.toString().length > 10) {
-                    display.innerText = Number(result.toFixed(8)).toString();
-                } else {
-                    display.innerText = result;
-                }
-            } catch (error) {
-                display.innerText = 'Error';
-                
-                // اهتزاز عند الخطأ (تجربة مستخدم أفضل)
-                if (isSafari) {
-                    display.classList.add('error');
-                    setTimeout(() => {
-                        display.classList.remove('error');
-                    }, 300);
-                }
-            }
-        }
-        
-        // إضافة دعم لوحة المفاتيح
-        document.addEventListener('keydown', function(event) {
-            if (/[0-9]/.test(event.key)) {
-                appendToDisplay(event.key);
-            } else if (event.key === '+' || event.key === '-' || event.key === '*' || event.key === '/') {
-                appendToDisplay(event.key);
-            } else if (event.key === '.') {
-                appendToDisplay('.');
-            } else if (event.key === 'Enter' || event.key === '=') {
-                calculate();
-            } else if (event.key === 'Escape' || event.key === 'c' || event.key === 'C') {
-                clearDisplay();
-            } else if (event.key === 'Backspace') {
-                if (display.innerText.length > 1) {
-                    display.innerText = display.innerText.slice(0, -1);
-                } else {
-                    display.innerText = '0';
-                }
-            }
-        });
-        
-        // منع تكبير الصفحة على iOS
-        document.addEventListener('touchmove', function (event) {
-            if (event.scale !== 1) {
-                event.preventDefault();
-            }
-        }, { passive: false });
     </script>
 </body>
 </html>
