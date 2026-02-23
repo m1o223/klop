@@ -1,89 +1,211 @@
-// controllers/authController.js
+// controllers/reminderController.js (متحكم_التذكيرات)
+const { db } = require("../firebaseAdmin"); // (قاعدة_البيانات) عدّل المسار إذا ملفك اسمه مختلف
 
-const bcrypt = require("bcrypt");
-const jwt = require("jsonwebtoken");
-const { admin, db } = require("../firebase");
+// مساعد بسيط للتحقق من تاريخ ISO
+function isValidISODate(value) {
+  const d = new Date(value);
+  return !Number.isNaN(d.getTime());
+}
 
-const JWT_SECRET = "BlueMindSecretKey"; // لاحقاً نخليه في .env
-
-// ================= REGISTER =================
-exports.register = async (req, res) => {
+/**
+ * ✅ POST /api/reminders
+ * body: { title, description?, date, time?, timezone? }
+ */
+const createReminder = async (req, res) => {
   try {
-    const { email, password, name } = req.body;
+    const userId = req.user?.uid;
 
-    if (!email || !password) {
-      return res.status(400).json({ error: "Email and password required" });
+    const { title, description = "", date, time = "", timezone = "UTC" } = req.body;
+
+    if (!userId) return res.status(401).json({ error: "Unauthorized" });
+
+    if (!title || typeof title !== "string" || title.trim().length < 2) {
+      return res.status(400).json({ error: "Title is required (min 2 chars)" });
     }
 
-    // Check if user exists
-    const userSnapshot = await db
-      .collection("users")
-      .where("email", "==", email)
-      .get();
-
-    if (!userSnapshot.empty) {
-      return res.status(400).json({ error: "User already exists" });
+    if (!date || typeof date !== "string" || !isValidISODate(date)) {
+      return res.status(400).json({ error: "Valid date (ISO) is required" });
     }
 
-    // Hash password
-    const hashedPassword = await bcrypt.hash(password, 10);
+    const reminderData = {
+      userId,
+      title: title.trim(),
+      description: typeof description === "string" ? description.trim() : "",
+      date, // ISO string
+      time: typeof time === "string" ? time.trim() : "", // optional
+      timezone: typeof timezone === "string" ? timezone.trim() : "UTC",
+      isDone: false,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
 
-    // Save user
-    const newUser = await db.collection("users").add({
-      email,
-      name: name || "",
-      password: hashedPassword,
-      createdAt: admin.firestore.FieldValue.serverTimestamp(),
-    });
+    const docRef = await db.collection("reminders").add(reminderData);
 
-    res.status(201).json({
-      message: "User registered successfully",
-      userId: newUser.id,
+    return res.status(201).json({
+      message: "Reminder created successfully",
+      id: docRef.id,
+      reminder: reminderData,
     });
   } catch (error) {
-    console.error("Register error:", error);
-    res.status(500).json({ error: "Something went wrong" });
+    return res.status(500).json({ error: error.message });
   }
 };
 
-// ================= LOGIN =================
-exports.login = async (req, res) => {
+/**
+ * ✅ GET /api/reminders
+ */
+const getReminders = async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const userId = req.user?.uid;
+    if (!userId) return res.status(401).json({ error: "Unauthorized" });
 
-    // Find user
-    const userSnapshot = await db
-      .collection("users")
-      .where("email", "==", email)
+    const snap = await db
+      .collection("reminders")
+      .where("userId", "==", userId)
+      .orderBy("createdAt", "desc")
       .get();
 
-    if (userSnapshot.empty) {
-      return res.status(400).json({ error: "User not found" });
-    }
+    const reminders = snap.docs.map((d) => ({
+      id: d.id,
+      ...d.data(),
+    }));
 
-    const userDoc = userSnapshot.docs[0];
-    const userData = userDoc.data();
-
-    // Compare password
-    const isMatch = await bcrypt.compare(password, userData.password);
-
-    if (!isMatch) {
-      return res.status(400).json({ error: "Invalid password" });
-    }
-
-    // Generate JWT
-    const token = jwt.sign(
-      { userId: userDoc.id },
-      JWT_SECRET,
-      { expiresIn: "7d" }
-    );
-
-    res.status(200).json({
-      message: "Login successful",
-      token,
-    });
+    return res.json({ reminders });
   } catch (error) {
-    console.error("Login error:", error);
-    res.status(500).json({ error: "Something went wrong" });
+    return res.status(500).json({ error: error.message });
   }
+};
+
+/**
+ * ✅ GET /api/reminders/:id
+ */
+const getReminderById = async (req, res) => {
+  try {
+    const userId = req.user?.uid;
+    const { id } = req.params;
+
+    if (!userId) return res.status(401).json({ error: "Unauthorized" });
+    if (!id) return res.status(400).json({ error: "Missing reminder id" });
+
+    const docRef = db.collection("reminders").doc(id);
+    const doc = await docRef.get();
+
+    if (!doc.exists) return res.status(404).json({ error: "Reminder not found" });
+
+    const data = doc.data();
+    if (data.userId !== userId) return res.status(403).json({ error: "Unauthorized" });
+
+    return res.json({ id: doc.id, ...data });
+  } catch (error) {
+    return res.status(500).json({ error: error.message });
+  }
+};
+
+/**
+ * ✅ PUT /api/reminders/:id
+ * body: { title?, description?, date?, time?, timezone?, isDone? }
+ */
+const updateReminder = async (req, res) => {
+  try {
+    const userId = req.user?.uid;
+    const { id } = req.params;
+
+    if (!userId) return res.status(401).json({ error: "Unauthorized" });
+    if (!id) return res.status(400).json({ error: "Missing reminder id" });
+
+    const docRef = db.collection("reminders").doc(id);
+    const doc = await docRef.get();
+
+    if (!doc.exists) return res.status(404).json({ error: "Reminder not found" });
+
+    const existing = doc.data();
+    if (existing.userId !== userId) return res.status(403).json({ error: "Unauthorized" });
+
+    const { title, description, date, time, timezone, isDone } = req.body;
+
+    const updates = { updatedAt: new Date().toISOString() };
+
+    if (title !== undefined) {
+      if (typeof title !== "string" || title.trim().length < 2) {
+        return res.status(400).json({ error: "Title must be string (min 2 chars)" });
+      }
+      updates.title = title.trim();
+    }
+
+    if (description !== undefined) {
+      if (typeof description !== "string") {
+        return res.status(400).json({ error: "Description must be string" });
+      }
+      updates.description = description.trim();
+    }
+
+    if (date !== undefined) {
+      if (typeof date !== "string" || !isValidISODate(date)) {
+        return res.status(400).json({ error: "date must be valid ISO string" });
+      }
+      updates.date = date;
+    }
+
+    if (time !== undefined) {
+      if (typeof time !== "string") {
+        return res.status(400).json({ error: "time must be string" });
+      }
+      updates.time = time.trim();
+    }
+
+    if (timezone !== undefined) {
+      if (typeof timezone !== "string") {
+        return res.status(400).json({ error: "timezone must be string" });
+      }
+      updates.timezone = timezone.trim();
+    }
+
+    if (isDone !== undefined) {
+      if (typeof isDone !== "boolean") {
+        return res.status(400).json({ error: "isDone must be boolean" });
+      }
+      updates.isDone = isDone;
+    }
+
+    await docRef.update(updates);
+
+    return res.json({ message: "Reminder updated successfully", id, updates });
+  } catch (error) {
+    return res.status(500).json({ error: error.message });
+  }
+};
+
+/**
+ * ✅ DELETE /api/reminders/:id
+ */
+const deleteReminder = async (req, res) => {
+  try {
+    const userId = req.user?.uid;
+    const { id } = req.params;
+
+    if (!userId) return res.status(401).json({ error: "Unauthorized" });
+    if (!id) return res.status(400).json({ error: "Missing reminder id" });
+
+    const docRef = db.collection("reminders").doc(id);
+    const doc = await docRef.get();
+
+    if (!doc.exists) return res.status(404).json({ error: "Reminder not found" });
+
+    const data = doc.data();
+    if (data.userId !== userId) return res.status(403).json({ error: "Unauthorized" });
+
+    await docRef.delete();
+
+    return res.json({ message: "Reminder deleted successfully", id });
+  } catch (error) {
+    return res.status(500).json({ error: error.message });
+  }
+};
+
+module.exports = {
+  createReminder,
+  getReminders,
+  getReminderById,
+  updateReminder,
+  deleteReminder,
 };
