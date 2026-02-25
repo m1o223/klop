@@ -1,22 +1,71 @@
 require("dotenv").config();
-
 const express = require("express");
 const cors = require("cors");
+const fs = require("fs");
 const path = require("path");
 const Stripe = require("stripe");
 
 const app = express();
-
 const stripe = Stripe(process.env.STRIPE_SECRET_KEY);
 
-// ✅ مهم: webhook لازم يكون قبل express.json
+app.use(cors());
+app.use(express.json());
+
+const PORT = 3000;
+const DATA_FILE = path.join(__dirname, "data.json");
+
+/* ---------------------------------------
+   HELPER: read / write users
+---------------------------------------- */
+
+function readUsers() {
+  if (!fs.existsSync(DATA_FILE)) return {};
+  return JSON.parse(fs.readFileSync(DATA_FILE));
+}
+
+function saveUsers(users) {
+  fs.writeFileSync(DATA_FILE, JSON.stringify(users, null, 2));
+}
+
+/* ---------------------------------------
+   CREATE CHECKOUT SESSION
+---------------------------------------- */
+
+app.post("/create-checkout-session", async (req, res) => {
+  try {
+    const { priceId, email } = req.body;
+
+    if (!priceId || !email) {
+      return res.status(400).json({ error: "priceId and email required" });
+    }
+
+    const session = await stripe.checkout.sessions.create({
+      mode: "subscription",
+      payment_method_types: ["card"],
+      line_items: [{ price: priceId, quantity: 1 }],
+      customer_email: email,
+      success_url: `http://localhost:${PORT}/success`,
+      cancel_url: `http://localhost:${PORT}/cancel`,
+    });
+
+    res.json({ url: session.url });
+  } catch (err) {
+    console.log("Checkout error:", err.message);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+/* ---------------------------------------
+   WEBHOOK
+---------------------------------------- */
+
 app.post(
   "/webhook",
   express.raw({ type: "application/json" }),
   (req, res) => {
     const sig = req.headers["stripe-signature"];
-
     let event;
+
     try {
       event = stripe.webhooks.constructEvent(
         req.body,
@@ -24,64 +73,71 @@ app.post(
         process.env.STRIPE_WEBHOOK_SECRET
       );
     } catch (err) {
-      console.log("❌ Webhook signature verify failed:", err.message);
+      console.log("Webhook signature failed:", err.message);
       return res.status(400).send(`Webhook Error: ${err.message}`);
     }
 
-    // ✅ هون بنشوف شو عم يوصل
-    console.log("✅ Stripe event:", event.type);
-
-    // أمثلة لأحداث مهمة:
+    // 🔥 أهم حدث
     if (event.type === "checkout.session.completed") {
       const session = event.data.object;
-      console.log("✅ Checkout completed. Session:", session.id);
+      const email = session.customer_details?.email;
+      const subscriptionId = session.subscription;
+
+      console.log("🔥 Payment completed for:", email);
+
+      const users = readUsers();
+
+      users[email] = {
+        premium: true,
+        subscriptionId: subscriptionId,
+        activatedAt: new Date(),
+      };
+
+      saveUsers(users);
+
+      console.log("✅ Premium activated for:", email);
     }
 
-    if (event.type === "invoice.paid") {
-      const invoice = event.data.object;
-      console.log("✅ Invoice paid:", invoice.id);
-    }
-
+    // ❌ إذا تم إلغاء الاشتراك
     if (event.type === "customer.subscription.deleted") {
-      const sub = event.data.object;
-      console.log("⚠️ Subscription cancelled:", sub.id);
+      const subscription = event.data.object;
+
+      const users = readUsers();
+
+      for (let email in users) {
+        if (users[email].subscriptionId === subscription.id) {
+          users[email].premium = false;
+          console.log("⚠️ Subscription cancelled for:", email);
+        }
+      }
+
+      saveUsers(users);
     }
 
     res.json({ received: true });
   }
 );
 
-// ✅ باقي السيرفر عادي
-app.use(cors());
-app.use(express.json());
-app.use(express.static(path.join(__dirname, "public")));
+/* ---------------------------------------
+   CHECK PREMIUM STATUS
+---------------------------------------- */
 
-app.get("/", (req, res) => {
-  res.sendFile(path.join(__dirname, "public", "index.html"));
-});
+app.get("/check-premium", (req, res) => {
+  const { email } = req.query;
 
-// ✅ إنشاء Checkout Session للاشتراك
-app.post("/create-checkout-session", async (req, res) => {
-  try {
-    const { priceId } = req.body;
-    if (!priceId) return res.status(400).json({ error: "priceId is required" });
+  const users = readUsers();
 
-    const session = await stripe.checkout.sessions.create({
-      mode: "subscription",
-      payment_method_types: ["card"],
-      line_items: [{ price: priceId, quantity: 1 }],
-      success_url: `${process.env.CLIENT_URL}/success`,
-      cancel_url: `${process.env.CLIENT_URL}/cancel`,
-    });
-
-    res.json({ url: session.url });
-  } catch (err) {
-    console.log("❌ create-checkout-session error:", err.message);
-    res.status(500).json({ error: err.message });
+  if (!users[email] || !users[email].premium) {
+    return res.json({ premium: false });
   }
+
+  res.json({ premium: true });
 });
 
-const PORT = 3000;
+/* ---------------------------------------
+   SERVER START
+---------------------------------------- */
+
 app.listen(PORT, () => {
   console.log(`🚀 Server running on http://localhost:${PORT}`);
 });
