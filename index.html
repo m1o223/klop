@@ -1,25 +1,22 @@
 require("dotenv").config();
 
 const express = require("express");
-const fs = require("fs");
 const path = require("path");
 const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
 
 const app = express();
 const PORT = 3000;
 
-const DATA_FILE = path.join(__dirname, "data.json");
+/* =====================================================
+   WEBHOOK (لازم يكون قبل express.json)
+===================================================== */
 
-/* ============================= */
-/* Middleware                    */
-/* ============================= */
-
-// مهم جداً: webhook لازم يقرأ raw body
 app.post(
   "/webhook",
   express.raw({ type: "application/json" }),
   (req, res) => {
     const sig = req.headers["stripe-signature"];
+    const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET;
 
     let event;
 
@@ -27,45 +24,40 @@ app.post(
       event = stripe.webhooks.constructEvent(
         req.body,
         sig,
-        process.env.STRIPE_WEBHOOK_SECRET
+        endpointSecret
       );
+
+      console.log("✅ Webhook verified:", event.type);
     } catch (err) {
       console.log("❌ Webhook signature failed.");
       return res.status(400).send(`Webhook Error: ${err.message}`);
     }
 
+    // تعامل مع الأحداث
     if (event.type === "checkout.session.completed") {
-      const session = event.data.object;
-      const email = session.metadata.userEmail;
-
-      const users = readUsers();
-
-      if (users[email]) {
-        users[email].premium = true;
-        saveUsers(users);
-        console.log("✅ Premium activated for:", email);
-      }
+      console.log("🎉 Subscription completed!");
     }
 
     res.json({ received: true });
   }
 );
 
-// باقي الroutes لازم يكونوا بعد webhook
-app.use(express.json());
-app.use(express.static("public"));
+/* =====================================================
+   NORMAL MIDDLEWARE
+===================================================== */
 
-/* ============================= */
-/* Create Checkout Session       */
-/* ============================= */
+app.use(express.json());
+app.use(express.static(path.join(__dirname, "public")));
+
+/* =====================================================
+   CREATE CHECKOUT SESSION
+===================================================== */
 
 app.post("/create-checkout-session", async (req, res) => {
-  const { email } = req.body;
-
   try {
     const session = await stripe.checkout.sessions.create({
+      mode: "subscription",
       payment_method_types: ["card"],
-      mode: "payment",
       line_items: [
         {
           price: process.env.STRIPE_PRICE_ID,
@@ -74,50 +66,15 @@ app.post("/create-checkout-session", async (req, res) => {
       ],
       success_url: "http://localhost:3000/success.html",
       cancel_url: "http://localhost:3000/cancel.html",
-      metadata: {
-        userEmail: email,
-      },
     });
 
     res.json({ url: session.url });
   } catch (error) {
-    console.log(error);
+    console.error(error);
     res.status(500).json({ error: "Something went wrong" });
   }
 });
 
-/* ============================= */
-/* Check Premium Route           */
-/* ============================= */
-
-app.get("/check-premium", (req, res) => {
-  const { email } = req.query;
-  const users = readUsers();
-
-  if (!users[email] || !users[email].premium) {
-    return res.json({ premium: false });
-  }
-
-  res.json({ premium: true });
-});
-
-/* ============================= */
-/* Helpers                       */
-/* ============================= */
-
-function readUsers() {
-  if (!fs.existsSync(DATA_FILE)) {
-    return {};
-  }
-  return JSON.parse(fs.readFileSync(DATA_FILE));
-}
-
-function saveUsers(users) {
-  fs.writeFileSync(DATA_FILE, JSON.stringify(users, null, 2));
-}
-
-/* ============================= */
-
-app.listen(PORT, () => {
-  console.log(`🚀 Server running on http://localhost:${PORT}`);
-});
+app.listen(PORT, () =>
+  console.log(`🚀 Server running on http://localhost:${PORT}`)
+);
