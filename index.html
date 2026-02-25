@@ -1,89 +1,87 @@
-require('dotenv').config();
+require("dotenv").config();
 
-const express = require('express');
-const cors = require('cors');
-const bodyParser = require('body-parser');
-const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
+const express = require("express");
+const cors = require("cors");
+const path = require("path");
+const Stripe = require("stripe");
 
 const app = express();
-const PORT = process.env.PORT || 3000;
 
+const stripe = Stripe(process.env.STRIPE_SECRET_KEY);
+
+// ✅ مهم: webhook لازم يكون قبل express.json
+app.post(
+  "/webhook",
+  express.raw({ type: "application/json" }),
+  (req, res) => {
+    const sig = req.headers["stripe-signature"];
+
+    let event;
+    try {
+      event = stripe.webhooks.constructEvent(
+        req.body,
+        sig,
+        process.env.STRIPE_WEBHOOK_SECRET
+      );
+    } catch (err) {
+      console.log("❌ Webhook signature verify failed:", err.message);
+      return res.status(400).send(`Webhook Error: ${err.message}`);
+    }
+
+    // ✅ هون بنشوف شو عم يوصل
+    console.log("✅ Stripe event:", event.type);
+
+    // أمثلة لأحداث مهمة:
+    if (event.type === "checkout.session.completed") {
+      const session = event.data.object;
+      console.log("✅ Checkout completed. Session:", session.id);
+    }
+
+    if (event.type === "invoice.paid") {
+      const invoice = event.data.object;
+      console.log("✅ Invoice paid:", invoice.id);
+    }
+
+    if (event.type === "customer.subscription.deleted") {
+      const sub = event.data.object;
+      console.log("⚠️ Subscription cancelled:", sub.id);
+    }
+
+    res.json({ received: true });
+  }
+);
+
+// ✅ باقي السيرفر عادي
 app.use(cors());
 app.use(express.json());
-app.use(bodyParser.raw({ type: 'application/json' }));
+app.use(express.static(path.join(__dirname, "public")));
 
-// ===============================
-// Create Checkout Session
-// ===============================
-app.post('/create-checkout-session', async (req, res) => {
+app.get("/", (req, res) => {
+  res.sendFile(path.join(__dirname, "public", "index.html"));
+});
+
+// ✅ إنشاء Checkout Session للاشتراك
+app.post("/create-checkout-session", async (req, res) => {
   try {
     const { priceId } = req.body;
+    if (!priceId) return res.status(400).json({ error: "priceId is required" });
 
     const session = await stripe.checkout.sessions.create({
-      payment_method_types: ['card'],
-      mode: 'subscription',
-      line_items: [
-        {
-          price: priceId,
-          quantity: 1,
-        },
-      ],
-      success_url: `http://localhost:${PORT}/success`,
-      cancel_url: `http://localhost:${PORT}/cancel`,
+      mode: "subscription",
+      payment_method_types: ["card"],
+      line_items: [{ price: priceId, quantity: 1 }],
+      success_url: `${process.env.CLIENT_URL}/success`,
+      cancel_url: `${process.env.CLIENT_URL}/cancel`,
     });
 
     res.json({ url: session.url });
-
-  } catch (error) {
-    console.error('Stripe Error:', error);
-    res.status(500).json({ error: 'Failed to create session' });
-  }
-});
-
-// ===============================
-// Success Route
-// ===============================
-app.get('/success', (req, res) => {
-  res.send('✅ Payment successful!');
-});
-
-// ===============================
-// Cancel Route
-// ===============================
-app.get('/cancel', (req, res) => {
-  res.send('❌ Payment cancelled.');
-});
-
-// ===============================
-// Webhook
-// ===============================
-app.post('/webhook', bodyParser.raw({ type: 'application/json' }), (req, res) => {
-  const sig = req.headers['stripe-signature'];
-
-  let event;
-
-  try {
-    event = stripe.webhooks.constructEvent(
-      req.body,
-      sig,
-      process.env.STRIPE_WEBHOOK_SECRET
-    );
   } catch (err) {
-    console.error('Webhook signature verification failed.', err.message);
-    return res.sendStatus(400);
+    console.log("❌ create-checkout-session error:", err.message);
+    res.status(500).json({ error: err.message });
   }
-
-  if (event.type === 'checkout.session.completed') {
-    const session = event.data.object;
-    console.log('🔥 Subscription successful:', session.id);
-
-    // هون لاحقاً تربط المستخدم بقاعدة البيانات
-  }
-
-  res.json({ received: true });
 });
 
-// ===============================
+const PORT = 3000;
 app.listen(PORT, () => {
-  console.log(`🚀 Server running on port ${PORT}`);
+  console.log(`🚀 Server running on http://localhost:${PORT}`);
 });
