@@ -3,18 +3,21 @@ require("dotenv").config();
 const express = require("express");
 const path = require("path");
 const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
+const admin = require("./firebaseAdmin"); // تأكد الاسم صح
+
+const db = admin.firestore();
 
 const app = express();
 const PORT = 3000;
 
 /* =====================================================
-   WEBHOOK (لازم يكون قبل express.json)
+   WEBHOOK (لازم يكون أول شي قبل json middleware)
 ===================================================== */
 
 app.post(
   "/webhook",
   express.raw({ type: "application/json" }),
-  (req, res) => {
+  async (req, res) => {
     const sig = req.headers["stripe-signature"];
     const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET;
 
@@ -33,9 +36,49 @@ app.post(
       return res.status(400).send(`Webhook Error: ${err.message}`);
     }
 
-    // تعامل مع الأحداث
+    /* ============================================= */
+
     if (event.type === "checkout.session.completed") {
-      console.log("🎉 Subscription completed!");
+      const session = event.data.object;
+
+      const userId = session.metadata.userId;
+      const subscriptionId = session.subscription;
+
+      console.log("🎉 Payment completed for user:", userId);
+
+      try {
+        await db.collection("users").doc(userId).update({
+          premium: true,
+          subscriptionId: subscriptionId,
+          updatedAt: new Date(),
+        });
+
+        console.log("🔥 User upgraded to PREMIUM");
+      } catch (error) {
+        console.error("❌ Firestore update error:", error);
+      }
+    }
+
+    /* ============================================= */
+
+    if (event.type === "customer.subscription.deleted") {
+      const subscription = event.data.object;
+
+      const subscriptionId = subscription.id;
+
+      const snapshot = await db
+        .collection("users")
+        .where("subscriptionId", "==", subscriptionId)
+        .get();
+
+      snapshot.forEach(async (doc) => {
+        await doc.ref.update({
+          premium: false,
+          subscriptionId: null,
+        });
+
+        console.log("⬇ User downgraded");
+      });
     }
 
     res.json({ received: true });
@@ -54,6 +97,8 @@ app.use(express.static(path.join(__dirname, "public")));
 ===================================================== */
 
 app.post("/create-checkout-session", async (req, res) => {
+  const { userId } = req.body;
+
   try {
     const session = await stripe.checkout.sessions.create({
       mode: "subscription",
@@ -66,14 +111,20 @@ app.post("/create-checkout-session", async (req, res) => {
       ],
       success_url: "http://localhost:3000/success.html",
       cancel_url: "http://localhost:3000/cancel.html",
+
+      metadata: {
+        userId: userId,
+      },
     });
 
     res.json({ url: session.url });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: "Something went wrong" });
+    res.status(500).json({ error: "Stripe error" });
   }
 });
+
+/* ===================================================== */
 
 app.listen(PORT, () =>
   console.log(`🚀 Server running on http://localhost:${PORT}`)
