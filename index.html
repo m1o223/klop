@@ -8,56 +8,14 @@ const Stripe = require("stripe");
 const app = express();
 const stripe = Stripe(process.env.STRIPE_SECRET_KEY);
 
-app.use(cors());
-app.use(express.json());
-
 const PORT = 3000;
 const DATA_FILE = path.join(__dirname, "data.json");
 
-/* ---------------------------------------
-   HELPER: read / write users
----------------------------------------- */
+app.use(cors());
 
-function readUsers() {
-  if (!fs.existsSync(DATA_FILE)) return {};
-  return JSON.parse(fs.readFileSync(DATA_FILE));
-}
-
-function saveUsers(users) {
-  fs.writeFileSync(DATA_FILE, JSON.stringify(users, null, 2));
-}
-
-/* ---------------------------------------
-   CREATE CHECKOUT SESSION
----------------------------------------- */
-
-app.post("/create-checkout-session", async (req, res) => {
-  try {
-    const { priceId, email } = req.body;
-
-    if (!priceId || !email) {
-      return res.status(400).json({ error: "priceId and email required" });
-    }
-
-    const session = await stripe.checkout.sessions.create({
-      mode: "subscription",
-      payment_method_types: ["card"],
-      line_items: [{ price: priceId, quantity: 1 }],
-      customer_email: email,
-      success_url: `http://localhost:${PORT}/success`,
-      cancel_url: `http://localhost:${PORT}/cancel`,
-    });
-
-    res.json({ url: session.url });
-  } catch (err) {
-    console.log("Checkout error:", err.message);
-    res.status(500).json({ error: err.message });
-  }
-});
-
-/* ---------------------------------------
-   WEBHOOK
----------------------------------------- */
+/* ================================
+   🔥 WEBHOOK FIRST (مهم جداً)
+================================ */
 
 app.post(
   "/webhook",
@@ -73,11 +31,10 @@ app.post(
         process.env.STRIPE_WEBHOOK_SECRET
       );
     } catch (err) {
-      console.log("Webhook signature failed:", err.message);
+      console.error("❌ Webhook signature failed:", err.message);
       return res.status(400).send(`Webhook Error: ${err.message}`);
     }
 
-    // 🔥 أهم حدث
     if (event.type === "checkout.session.completed") {
       const session = event.data.object;
       const email = session.customer_details?.email;
@@ -98,10 +55,8 @@ app.post(
       console.log("✅ Premium activated for:", email);
     }
 
-    // ❌ إذا تم إلغاء الاشتراك
     if (event.type === "customer.subscription.deleted") {
       const subscription = event.data.object;
-
       const users = readUsers();
 
       for (let email in users) {
@@ -118,25 +73,48 @@ app.post(
   }
 );
 
-/* ---------------------------------------
-   CHECK PREMIUM STATUS
----------------------------------------- */
+/* ================================
+   🔥 JSON middleware AFTER webhook
+================================ */
 
-app.get("/check-premium", (req, res) => {
-  const { email } = req.query;
+app.use(express.json());
 
-  const users = readUsers();
+/* ================================
+   CREATE CHECKOUT
+================================ */
 
-  if (!users[email] || !users[email].premium) {
-    return res.json({ premium: false });
+app.post("/create-checkout-session", async (req, res) => {
+  try {
+    const { priceId, email } = req.body;
+
+    const session = await stripe.checkout.sessions.create({
+      mode: "subscription",
+      payment_method_types: ["card"],
+      line_items: [{ price: priceId, quantity: 1 }],
+      customer_email: email,
+      success_url: `http://localhost:${PORT}/success`,
+      cancel_url: `http://localhost:${PORT}/cancel`,
+    });
+
+    res.json({ url: session.url });
+  } catch (err) {
+    console.log("Checkout error:", err.message);
+    res.status(500).json({ error: err.message });
   }
-
-  res.json({ premium: true });
 });
 
-/* ---------------------------------------
-   SERVER START
----------------------------------------- */
+/* ================================
+   USER STORAGE
+================================ */
+
+function readUsers() {
+  if (!fs.existsSync(DATA_FILE)) return {};
+  return JSON.parse(fs.readFileSync(DATA_FILE));
+}
+
+function saveUsers(users) {
+  fs.writeFileSync(DATA_FILE, JSON.stringify(users, null, 2));
+}
 
 app.listen(PORT, () => {
   console.log(`🚀 Server running on http://localhost:${PORT}`);
