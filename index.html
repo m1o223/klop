@@ -1,136 +1,23 @@
-require("dotenv").config();
+import express from "express";
+import { ensureUser } from "../services/userService.js";
+import { verifyFirebaseToken } from "../middlewares/auth.js";
 
-const express = require("express");
-const path = require("path");
-const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
-const admin = require("./firebaseAdmin");
+const router = express.Router();
 
-const db = admin.firestore();
-
-const app = express();
-const PORT = 3000;
-
-/* =====================================================
-   WEBHOOK (مهم يكون قبل express.json)
-===================================================== */
-
-app.post(
-  "/webhook",
-  express.raw({ type: "application/json" }),
-  async (req, res) => {
-    const sig = req.headers["stripe-signature"];
-    const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET;
-
-    let event;
-
-    try {
-      event = stripe.webhooks.constructEvent(
-        req.body,
-        sig,
-        endpointSecret
-      );
-      console.log("✅ Webhook verified:", event.type);
-    } catch (err) {
-      console.log("❌ Webhook signature failed.");
-      return res.status(400).send(`Webhook Error: ${err.message}`);
-    }
-
-    /* ============================================= */
-
-    if (event.type === "checkout.session.completed") {
-      const session = event.data.object;
-
-      const userId = session.metadata.userId;
-      const subscriptionId = session.subscription;
-
-      if (!userId) {
-        console.log("❌ No userId in metadata");
-        return res.json({ received: true });
-      }
-
-      console.log("🎉 Payment completed for:", userId);
-
-      try {
-        await db.collection("users").doc(userId).update({
-          premium: true,
-          subscriptionId: subscriptionId,
-          updatedAt: new Date(),
-        });
-
-        console.log("🔥 User upgraded to PREMIUM");
-      } catch (error) {
-        console.error("❌ Firestore update error:", error);
-      }
-    }
-
-    /* ============================================= */
-
-    if (event.type === "customer.subscription.deleted") {
-      const subscription = event.data.object;
-
-      const snapshot = await db
-        .collection("users")
-        .where("subscriptionId", "==", subscription.id)
-        .get();
-
-      snapshot.forEach(async (doc) => {
-        await doc.ref.update({
-          premium: false,
-          subscriptionId: null,
-        });
-
-        console.log("⬇ User downgraded");
-      });
-    }
-
-    res.json({ received: true });
-  }
-);
-
-/* =====================================================
-   NORMAL MIDDLEWARE
-===================================================== */
-
-app.use(express.json());
-app.use(express.static(path.join(__dirname, "public")));
-
-/* =====================================================
-   CREATE CHECKOUT SESSION
-===================================================== */
-
-app.post("/create-checkout-session", async (req, res) => {
-  const userId = req.body.userId;
-
-  if (!userId) {
-    return res.status(400).json({ error: "Missing userId" });
-  }
-
+router.post("/create-user", verifyFirebaseToken, async (req, res) => {
   try {
-    const session = await stripe.checkout.sessions.create({
-      mode: "subscription",
-      payment_method_types: ["card"],
-      line_items: [
-        {
-          price: process.env.STRIPE_PRICE_ID,
-          quantity: 1,
-        },
-      ],
-      success_url: "http://localhost:3000/success.html",
-      cancel_url: "http://localhost:3000/cancel.html",
-      metadata: {
-        userId: userId,
-      },
-    });
+    const uid = req.body.uid || req.auth?.uid;
+    const email = req.body.email || req.auth?.email || null;
 
-    res.json({ url: session.url });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: "Stripe error" });
+    if (!uid)
+      return res.status(400).json({ error: "uid required" });
+
+    const user = await ensureUser(uid, email);
+
+    res.json({ success: true, user });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
   }
 });
 
-/* ===================================================== */
-
-app.listen(PORT, () =>
-  console.log(`🚀 Server running on http://localhost:${PORT}`)
-);
+export default router;
