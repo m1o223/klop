@@ -1,20 +1,25 @@
 import express from "express";
-import { ensureUser } from "../services/userService.js";
 import { verifyFirebaseToken } from "../middlewares/auth.js";
+import { checkMessageLimit } from "../middlewares/limits.js";
+import { db } from "../config/firebase.js";
 
 const router = express.Router();
 
-router.post("/create-user", verifyFirebaseToken, async (req, res) => {
+router.post("/", verifyFirebaseToken, checkMessageLimit, async (req, res) => {
   try {
-    const uid = req.body.uid || req.auth?.uid;
-    const email = req.body.email || req.auth?.email || null;
+    const { message } = req.body;
 
-    if (!uid)
-      return res.status(400).json({ error: "uid required" });
+    if (!message)
+      return res.status(400).json({ error: "message required" });
 
-    const user = await ensureUser(uid, email);
+    // Placeholder AI response
+    const reply = `BlueMind AI says: ${message}`;
 
-    res.json({ success: true, user });
+    await db.collection("users").doc(req.uid).update({
+      messagesUsed: (req.user.messagesUsed || 0) + 1,
+    });
+
+    res.json({ success: true, reply });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
