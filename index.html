@@ -1,28 +1,48 @@
-import express from "express";
-import { verifyFirebaseToken } from "../middlewares/auth.js";
-import { checkMessageLimit } from "../middlewares/limits.js";
-import { db } from "../config/firebase.js";
+import admin from "firebase-admin";
+import { env } from "./env.js";
+import fs from "fs";
 
-const router = express.Router();
+function initFirebase() {
+  if (admin.apps.length) return;
 
-router.post("/", verifyFirebaseToken, checkMessageLimit, async (req, res) => {
-  try {
-    const { message } = req.body;
+  // خيار 1: serviceAccount.json path
+  if (env.FIREBASE_SERVICE_ACCOUNT_PATH) {
+    const path = env.FIREBASE_SERVICE_ACCOUNT_PATH;
 
-    if (!message)
-      return res.status(400).json({ error: "message required" });
+    if (!fs.existsSync(path)) {
+      throw new Error(
+        `Firebase service account file not found: ${path} (check FIREBASE_SERVICE_ACCOUNT_PATH)`
+      );
+    }
 
-    // Placeholder AI response
-    const reply = `BlueMind AI says: ${message}`;
+    const raw = fs.readFileSync(path, "utf-8");
+    const serviceAccount = JSON.parse(raw);
 
-    await db.collection("users").doc(req.uid).update({
-      messagesUsed: (req.user.messagesUsed || 0) + 1,
+    admin.initializeApp({
+      credential: admin.credential.cert(serviceAccount),
     });
-
-    res.json({ success: true, reply });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
+    return;
   }
-});
 
-export default router;
+  // خيار 2: Env vars (للنشر)
+  if (env.FIREBASE_PROJECT_ID && env.FIREBASE_CLIENT_EMAIL && env.FIREBASE_PRIVATE_KEY) {
+    admin.initializeApp({
+      credential: admin.credential.cert({
+        projectId: env.FIREBASE_PROJECT_ID,
+        clientEmail: env.FIREBASE_CLIENT_EMAIL,
+        privateKey: env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, "\n"),
+      }),
+    });
+    return;
+  }
+
+  throw new Error(
+    "Firebase Admin not configured. Provide FIREBASE_SERVICE_ACCOUNT_PATH or FIREBASE_PROJECT_ID/CLIENT_EMAIL/PRIVATE_KEY"
+  );
+}
+
+initFirebase();
+
+export { admin };
+export const db = admin.firestore();
+export const auth = admin.auth();
