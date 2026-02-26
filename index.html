@@ -1,51 +1,12 @@
-import express from "express";
-import cors from "cors";
+export async function askAI(message) {
+  // حالياً نسخة تجريبية (Mock AI)
+  // بعدين بنربطه بـ OpenAI الحقيقي
 
-import { env } from "./config/env.js";
-import { verifyFirebaseToken } from "./middlewares/authMiddleware.js";
-import { errorHandler } from "./middlewares/errorHandler.js";
-
-import { userRoutes } from "./routes/userRoutes.js";
-import { chatRoutes } from "./routes/chatRoutes.js";
-import { adminRoutes } from "./routes/adminRoutes.js";
-import { stripeRoutes } from "./routes/stripeRoutes.js";
-
-const app = express();
-
-// 1) Stripe webhook RAW لازم يكون قبل express.json
-app.post(
-  "/stripe/webhook",
-  express.raw({ type: "application/json" }),
-  (req, res, next) => {
-    // تحويل للراوتر (لأن الراوتر مسجل نفس المسار)
-    next();
+  if (!message) {
+    throw new Error("Message is required");
   }
-);
 
-// 2) باقي الميدل وير
-app.use(cors());
-
-// ⚠️ مهم: json بعد webhook raw
-app.use(express.json());
-
-// 3) Auth decode (يسمح يكون token فاضي)
-app.use(verifyFirebaseToken);
-
-// 4) Routes
-app.get("/health", (req, res) => {
-  res.json({ ok: true, name: "BlueMind.AI", time: new Date().toISOString() });
-});
-
-app.use(userRoutes);
-app.use(chatRoutes);
-app.use(adminRoutes);
-
-// راوتر Stripe (فيه /stripe/webhook + /stripe/create-checkout-session)
-app.use(stripeRoutes);
-
-// 5) Global error handler
-app.use(errorHandler);
-
-app.listen(env.PORT, () => {
-  console.log(`🚀 BlueMind.AI server running on http://localhost:${env.PORT}`);
-});
+  return {
+    reply: `🤖 BlueMind AI says: I received your message -> "${message}"`,
+  };
+}
