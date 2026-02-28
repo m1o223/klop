@@ -1,28 +1,43 @@
-import cron from "node-cron";
-import { getActiveReminders } from "./reminderService.js";
-import { sendPushNotification } from "./notificationService.js";
-import { db } from "../config/firebase.js";
+import express from "express";
 
-export function startReminderScheduler() {
-  cron.schedule("* * * * *", async () => {
-    const now = new Date();
-    const currentTime = now.toTimeString().slice(0, 5); // HH:MM
+const router = express.Router();
 
-    const reminders = await getActiveReminders();
-
-    for (const reminder of reminders) {
-      if (reminder.time === currentTime) {
-        const userDoc = await db.collection("users").doc(reminder.uid).get();
-        const user = userDoc.data();
-
-        if (user?.fcmToken) {
-          await sendPushNotification(
-            user.fcmToken,
-            "تذكير 📌",
-            `لا تنسى ${reminder.title}`
-          );
-        }
-      }
-    }
+// 🟢 Test route
+router.get("/", (req, res) => {
+  res.status(200).json({
+    success: true,
+    message: "Admin route is working 🚀",
   });
-}
+});
+
+// 🟢 Example: Get dashboard stats
+router.get("/dashboard", async (req, res, next) => {
+  try {
+    // هون مستقبلاً بتحط منطق جلب الإحصائيات
+    res.json({
+      success: true,
+      users: 120,
+      activeUsers: 85,
+      revenue: 3400,
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
+// 🟢 Example: Delete user (placeholder)
+router.delete("/user/:id", async (req, res, next) => {
+  try {
+    const { id } = req.params;
+
+    // هون تحط منطق حذف المستخدم من الداتابيس
+    res.json({
+      success: true,
+      message: `User ${id} deleted successfully`,
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
+export default router;
