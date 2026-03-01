@@ -1,43 +1,95 @@
-import express from "express";
+import User from "../models/userModel.js";
+import bcrypt from "bcryptjs";
+import jwt from "jsonwebtoken";
 
-const router = express.Router();
+/* =========================
+   GENERATE TOKEN
+========================= */
+const generateToken = (id) => {
+  return jwt.sign(
+    { id },
+    process.env.JWT_SECRET,
+    { expiresIn: "30d" }
+  );
+};
 
-// 🟢 Test route
-router.get("/", (req, res) => {
-  res.status(200).json({
-    success: true,
-    message: "Admin route is working 🚀",
-  });
-});
-
-// 🟢 Example: Get dashboard stats
-router.get("/dashboard", async (req, res, next) => {
+/* =========================
+   REGISTER
+========================= */
+export const register = async (req, res) => {
   try {
-    // هون مستقبلاً بتحط منطق جلب الإحصائيات
-    res.json({
-      success: true,
-      users: 120,
-      activeUsers: 85,
-      revenue: 3400,
-    });
-  } catch (error) {
-    next(error);
-  }
-});
+    const { name, email, password } = req.body;
 
-// 🟢 Example: Delete user (placeholder)
-router.delete("/user/:id", async (req, res, next) => {
+    if (!name || !email || !password) {
+      return res.status(400).json({
+        message: "Please fill all fields",
+      });
+    }
+
+    const userExists = await User.findOne({ email });
+
+    if (userExists) {
+      return res.status(400).json({
+        message: "User already exists",
+      });
+    }
+
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(password, salt);
+
+    const user = await User.create({
+      name,
+      email,
+      password: hashedPassword,
+    });
+
+    res.status(201).json({
+      _id: user._id,
+      name: user.name,
+      email: user.email,
+      token: generateToken(user._id),
+    });
+
+  } catch (error) {
+    res.status(500).json({
+      message: error.message,
+    });
+  }
+};
+
+/* =========================
+   LOGIN
+========================= */
+export const login = async (req, res) => {
   try {
-    const { id } = req.params;
+    const { email, password } = req.body;
 
-    // هون تحط منطق حذف المستخدم من الداتابيس
+    const user = await User.findOne({ email });
+
+    if (!user) {
+      return res.status(400).json({
+        message: "Invalid email or password",
+      });
+    }
+
+    const isMatch = await bcrypt.compare(password, user.password);
+
+    if (!isMatch) {
+      return res.status(400).json({
+        message: "Invalid email or password",
+      });
+    }
+
     res.json({
-      success: true,
-      message: `User ${id} deleted successfully`,
+      _id: user._id,
+      name: user.name,
+      email: user.email,
+      token: generateToken(user._id),
     });
-  } catch (error) {
-    next(error);
-  }
-});
 
-export default router;
+  } catch (error) {
+    res.status(500).json({
+      message: error.message,
+    });
+  }
+};
