@@ -1,57 +1,38 @@
-import { useNavigate } from "react-router-dom"
 import { theme } from "../theme"
 
-function AuthButtons() {
-  const navigate = useNavigate()
+function AuthLayout({ title, children }) {
+  const container = {
+    background: theme.background,
+    height: "100vh",
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+    color: theme.text
+  }
 
-  const base = {
-    padding: "16px",
-    borderRadius: "16px",
-    fontWeight: "600",
-    fontSize: "16px",
-    backdropFilter: "blur(10px)",
-    border: `1px solid ${theme.border}`,
-    marginBottom: "14px",
-    width: "100%",
-    cursor: "pointer"
+  const card = {
+    width: "380px",
+    padding: "40px",
+    borderRadius: "24px",
+    background: theme.card,
+    backdropFilter: "blur(20px)",
+    border: `1px solid ${theme.border}`
+  }
+
+  const heading = {
+    fontSize: "28px",
+    fontWeight: "700",
+    marginBottom: "30px"
   }
 
   return (
-    <div style={{ width: "100%", maxWidth: "400px" }}>
-      <button
-        style={{ ...base, background: "#fff", color: "#000" }}
-        onClick={() => alert("Apple Login Later")}
-      >
-         Continue with Apple
-      </button>
-
-      <button
-        style={{ ...base, background: theme.card, color: "white" }}
-        onClick={() => alert("Google Login Later")}
-      >
-        Continue with Google
-      </button>
-
-      <button
-        style={{
-          ...base,
-          background: theme.primaryGradient,
-          color: "white",
-          border: "none"
-        }}
-        onClick={() => navigate("/register")}
-      >
-        Register
-      </button>
-
-      <button
-        style={{ ...base, background: "transparent", color: "white" }}
-        onClick={() => navigate("/login")}
-      >
-        Login
-      </button>
+    <div style={container}>
+      <div style={card}>
+        <div style={heading}>{title}</div>
+        {children}
+      </div>
     </div>
   )
 }
 
-export default AuthButtons
+export default AuthLayout
