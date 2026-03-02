@@ -2,7 +2,7 @@ import { useNavigate } from "react-router-dom"
 import AuthLayout from "./AuthLayout"
 import { theme } from "../theme"
 
-function Login() {
+function Register() {
   const navigate = useNavigate()
 
   const input = {
@@ -36,23 +36,24 @@ function Login() {
   }
 
   return (
-    <AuthLayout title="Login">
+    <AuthLayout title="Create Account">
+      <input type="text" placeholder="Name" style={input} />
       <input type="email" placeholder="Email" style={input} />
       <input type="password" placeholder="Password" style={input} />
 
-      <button style={button}>Login</button>
+      <button style={button}>Sign Up</button>
 
       <div style={linkStyle}>
-        Don't have an account?{" "}
+        Already have an account?{" "}
         <span
           style={{ color: "#7C5CFF" }}
-          onClick={() => navigate("/register")}
+          onClick={() => navigate("/login")}
         >
-          Sign up
+          Login
         </span>
       </div>
     </AuthLayout>
   )
 }
 
-export default Login
+export default Register
