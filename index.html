@@ -1,15 +1,44 @@
-import axios from "axios";
+import { theme } from "../theme"
 
-const api = axios.create({
-  baseURL: "http://localhost:3000/api", // عدّل إذا عندك مسار مختلف
-});
-
-api.interceptors.request.use((config) => {
-  const token = localStorage.getItem("token");
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
+function AuthButtons() {
+  const base = {
+    padding: "16px",
+    borderRadius: "16px",
+    fontWeight: "600",
+    fontSize: "16px",
+    backdropFilter: "blur(10px)",
+    border: `1px solid ${theme.border}`,
+    marginBottom: "14px",
+    width: "100%",
+    cursor: "pointer"
   }
-  return config;
-});
 
-export default api;t api;
+  return (
+    <div style={{ width: "100%", maxWidth: "400px" }}>
+      <button style={{ ...base, background: "#fff", color: "#000" }}>
+         Continue with Apple
+      </button>
+
+      <button style={{ ...base, background: theme.card, color: "white" }}>
+        Continue with Google
+      </button>
+
+      <button
+        style={{
+          ...base,
+          background: theme.primaryGradient,
+          color: "white",
+          border: "none"
+        }}
+      >
+        Register
+      </button>
+
+      <button style={{ ...base, background: "transparent", color: "white" }}>
+        Login
+      </button>
+    </div>
+  )
+}
+
+export default AuthButtons
