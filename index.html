@@ -1,57 +1,57 @@
+import { useNavigate } from "react-router-dom"
 import { theme } from "../theme"
 
-function Register() {
-  const container = {
-    background: theme.background,
-    height: "100vh",
-    color: theme.text,
-    display: "flex",
-    justifyContent: "center",
-    alignItems: "center"
-  }
+function AuthButtons() {
+  const navigate = useNavigate()
 
-  const card = {
-    background: theme.card,
-    padding: "40px",
-    borderRadius: "20px",
-    width: "350px",
-    backdropFilter: "blur(15px)",
-    border: `1px solid ${theme.border}`
-  }
-
-  const input = {
-    width: "100%",
-    padding: "14px",
-    marginBottom: "15px",
-    borderRadius: "12px",
+  const base = {
+    padding: "16px",
+    borderRadius: "16px",
+    fontWeight: "600",
+    fontSize: "16px",
+    backdropFilter: "blur(10px)",
     border: `1px solid ${theme.border}`,
-    background: "transparent",
-    color: "white"
+    marginBottom: "14px",
+    width: "100%",
+    cursor: "pointer"
   }
 
   return (
-    <div style={container}>
-      <div style={card}>
-        <h2>Create Account</h2>
-        <input style={input} placeholder="Name" />
-        <input style={input} placeholder="Email" />
-        <input style={input} placeholder="Password" type="password" />
+    <div style={{ width: "100%", maxWidth: "400px" }}>
+      <button
+        style={{ ...base, background: "#fff", color: "#000" }}
+        onClick={() => alert("Apple Login Later")}
+      >
+         Continue with Apple
+      </button>
 
-        <button
-          style={{
-            width: "100%",
-            padding: "14px",
-            borderRadius: "12px",
-            background: theme.primaryGradient,
-            color: "white",
-            border: "none"
-          }}
-        >
-          Sign Up
-        </button>
-      </div>
+      <button
+        style={{ ...base, background: theme.card, color: "white" }}
+        onClick={() => alert("Google Login Later")}
+      >
+        Continue with Google
+      </button>
+
+      <button
+        style={{
+          ...base,
+          background: theme.primaryGradient,
+          color: "white",
+          border: "none"
+        }}
+        onClick={() => navigate("/register")}
+      >
+        Register
+      </button>
+
+      <button
+        style={{ ...base, background: "transparent", color: "white" }}
+        onClick={() => navigate("/login")}
+      >
+        Login
+      </button>
     </div>
   )
 }
 
-export default Register
+export default AuthButtons
