@@ -1,25 +1,25 @@
 import { Link } from "react-router-dom"
 
-function Login() {
+function Register() {
   return (
     <div style={styles.container}>
       <div style={styles.topBar}>
         <span style={styles.back}>←</span>
-        <h2 style={styles.title}>Login</h2>
+        <h2 style={styles.title}>Create Account</h2>
       </div>
 
       <div style={styles.form}>
+        <input type="text" placeholder="Name" style={styles.input} />
         <input type="email" placeholder="Email" style={styles.input} />
         <input type="password" placeholder="Password" style={styles.input} />
+        <input type="password" placeholder="Confirm Password" style={styles.input} />
 
-        <div style={styles.forgot}>Forgot password?</div>
-
-        <button style={styles.button}>Login</button>
+        <button style={styles.button}>Sign Up</button>
 
         <div style={styles.switchText}>
-          Don’t have an account?{" "}
-          <Link to="/register" style={styles.link}>
-            Sign Up
+          Already have an account?{" "}
+          <Link to="/login" style={styles.link}>
+            Log in
           </Link>
         </div>
       </div>
@@ -69,13 +69,6 @@ const styles = {
     outline: "none"
   },
 
-  forgot: {
-    textAlign: "right",
-    fontSize: "13px",
-    color: "#9C6BFF",
-    cursor: "pointer"
-  },
-
   button: {
     marginTop: "10px",
     padding: "16px",
@@ -101,4 +94,4 @@ const styles = {
   }
 }
 
-export default Login
+export default Register
