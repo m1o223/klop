@@ -1,27 +1,27 @@
-import { Link } from "react-router-dom"
+import { useNavigate } from "react-router-dom"
 
-function Register() {
+function Auth() {
+  const navigate = useNavigate()
+
   return (
     <div style={styles.container}>
-      <div style={styles.topBar}>
-        <span style={styles.back}>←</span>
-        <h2 style={styles.title}>Create Account</h2>
-      </div>
+      <div style={styles.content}>
+        <h1 style={styles.logo}>BlueMind</h1>
 
-      <div style={styles.form}>
-        <input type="text" placeholder="Name" style={styles.input} />
-        <input type="email" placeholder="Email" style={styles.input} />
-        <input type="password" placeholder="Password" style={styles.input} />
-        <input type="password" placeholder="Confirm Password" style={styles.input} />
+        <button style={styles.appleBtn}>
+           Continue with Apple
+        </button>
 
-        <button style={styles.button}>Sign Up</button>
+        <button style={styles.googleBtn}>
+          Continue with Google
+        </button>
 
-        <div style={styles.switchText}>
-          Already have an account?{" "}
-          <Link to="/login" style={styles.link}>
-            Log in
-          </Link>
-        </div>
+        <button
+          style={styles.emailBtn}
+          onClick={() => navigate("/login")}
+        >
+          Continue with Email
+        </button>
       </div>
     </div>
   )
@@ -31,67 +31,61 @@ const styles = {
   container: {
     height: "100vh",
     background: "linear-gradient(180deg, #0B0F2A 0%, #0E1335 100%)",
-    color: "#F3F4F8",
-    padding: "20px 30px",
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+    padding: "30px",
     fontFamily: "sans-serif"
   },
 
-  topBar: {
-    display: "flex",
-    alignItems: "center",
-    gap: "15px",
-    marginBottom: "50px"
-  },
-
-  back: {
-    fontSize: "22px",
-    cursor: "pointer"
-  },
-
-  title: {
-    fontSize: "24px",
-    fontWeight: "500"
-  },
-
-  form: {
+  content: {
+    width: "100%",
+    maxWidth: "350px",
     display: "flex",
     flexDirection: "column",
     gap: "18px"
   },
 
-  input: {
-    background: "#151A3F",
-    border: "none",
-    padding: "16px",
-    borderRadius: "12px",
+  logo: {
     color: "#F3F4F8",
-    fontSize: "14px",
-    outline: "none"
+    fontSize: "32px",
+    fontWeight: "600",
+    textAlign: "center",
+    marginBottom: "40px"
   },
 
-  button: {
-    marginTop: "10px",
+  appleBtn: {
     padding: "16px",
     borderRadius: "14px",
     border: "none",
-    fontSize: "16px",
-    fontWeight: "600",
-    color: "white",
-    background: "linear-gradient(90deg, #5E5BFF, #8A5CFF)",
+    fontSize: "15px",
+    fontWeight: "500",
+    background: "#ffffff",
+    color: "#000000",
     cursor: "pointer"
   },
 
-  switchText: {
-    marginTop: "25px",
-    fontSize: "14px",
-    color: "#ccc"
+  googleBtn: {
+    padding: "16px",
+    borderRadius: "14px",
+    border: "1px solid #333",
+    fontSize: "15px",
+    fontWeight: "500",
+    background: "#151A3F",
+    color: "#F3F4F8",
+    cursor: "pointer"
   },
 
-  link: {
-    color: "#9C6BFF",
-    textDecoration: "none",
-    fontWeight: "500"
+  emailBtn: {
+    padding: "16px",
+    borderRadius: "14px",
+    border: "none",
+    fontSize: "15px",
+    fontWeight: "600",
+    background: "linear-gradient(90deg, #5E5BFF, #8A5CFF)",
+    color: "white",
+    cursor: "pointer"
   }
 }
 
-export default Register
+export default Auth
