@@ -1,38 +1,58 @@
+import { useNavigate } from "react-router-dom"
+import AuthLayout from "./AuthLayout"
 import { theme } from "../theme"
 
-function AuthLayout({ title, children }) {
-  const container = {
-    background: theme.background,
-    height: "100vh",
-    display: "flex",
-    justifyContent: "center",
-    alignItems: "center",
-    color: theme.text
+function Login() {
+  const navigate = useNavigate()
+
+  const input = {
+    width: "100%",
+    padding: "14px",
+    marginBottom: "16px",
+    borderRadius: "14px",
+    border: `1px solid ${theme.border}`,
+    background: "transparent",
+    color: "white",
+    fontSize: "14px"
   }
 
-  const card = {
-    width: "380px",
-    padding: "40px",
-    borderRadius: "24px",
-    background: theme.card,
-    backdropFilter: "blur(20px)",
-    border: `1px solid ${theme.border}`
+  const button = {
+    width: "100%",
+    padding: "14px",
+    borderRadius: "14px",
+    border: "none",
+    background: theme.primaryGradient,
+    color: "white",
+    fontWeight: "600",
+    cursor: "pointer",
+    marginTop: "10px"
   }
 
-  const heading = {
-    fontSize: "28px",
-    fontWeight: "700",
-    marginBottom: "30px"
+  const linkStyle = {
+    marginTop: "20px",
+    fontSize: "14px",
+    color: theme.textSecondary,
+    cursor: "pointer"
   }
 
   return (
-    <div style={container}>
-      <div style={card}>
-        <div style={heading}>{title}</div>
-        {children}
+    <AuthLayout title="Login">
+      <input type="email" placeholder="Email" style={input} />
+      <input type="password" placeholder="Password" style={input} />
+
+      <button style={button}>Login</button>
+
+      <div style={linkStyle}>
+        Don't have an account?{" "}
+        <span
+          style={{ color: "#7C5CFF" }}
+          onClick={() => navigate("/register")}
+        >
+          Sign up
+        </span>
       </div>
-    </div>
+    </AuthLayout>
   )
 }
 
-export default AuthLayout
+export default Login
