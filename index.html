@@ -1,59 +1,104 @@
-import { useNavigate } from "react-router-dom"
-import AuthLayout from "./AuthLayout"
-import { theme } from "../theme"
+import { Link } from "react-router-dom"
 
-function Register() {
-  const navigate = useNavigate()
-
-  const input = {
-    width: "100%",
-    padding: "14px",
-    marginBottom: "16px",
-    borderRadius: "14px",
-    border: `1px solid ${theme.border}`,
-    background: "transparent",
-    color: "white",
-    fontSize: "14px"
-  }
-
-  const button = {
-    width: "100%",
-    padding: "14px",
-    borderRadius: "14px",
-    border: "none",
-    background: theme.primaryGradient,
-    color: "white",
-    fontWeight: "600",
-    cursor: "pointer",
-    marginTop: "10px"
-  }
-
-  const linkStyle = {
-    marginTop: "20px",
-    fontSize: "14px",
-    color: theme.textSecondary,
-    cursor: "pointer"
-  }
-
+function Login() {
   return (
-    <AuthLayout title="Create Account">
-      <input type="text" placeholder="Name" style={input} />
-      <input type="email" placeholder="Email" style={input} />
-      <input type="password" placeholder="Password" style={input} />
-
-      <button style={button}>Sign Up</button>
-
-      <div style={linkStyle}>
-        Already have an account?{" "}
-        <span
-          style={{ color: "#7C5CFF" }}
-          onClick={() => navigate("/login")}
-        >
-          Login
-        </span>
+    <div style={styles.container}>
+      <div style={styles.topBar}>
+        <span style={styles.back}>←</span>
+        <h2 style={styles.title}>Login</h2>
       </div>
-    </AuthLayout>
+
+      <div style={styles.form}>
+        <input type="email" placeholder="Email" style={styles.input} />
+        <input type="password" placeholder="Password" style={styles.input} />
+
+        <div style={styles.forgot}>Forgot password?</div>
+
+        <button style={styles.button}>Login</button>
+
+        <div style={styles.switchText}>
+          Don’t have an account?{" "}
+          <Link to="/register" style={styles.link}>
+            Sign Up
+          </Link>
+        </div>
+      </div>
+    </div>
   )
 }
 
-export default Register
+const styles = {
+  container: {
+    height: "100vh",
+    background: "linear-gradient(180deg, #0B0F2A 0%, #0E1335 100%)",
+    color: "#F3F4F8",
+    padding: "20px 30px",
+    fontFamily: "sans-serif"
+  },
+
+  topBar: {
+    display: "flex",
+    alignItems: "center",
+    gap: "15px",
+    marginBottom: "50px"
+  },
+
+  back: {
+    fontSize: "22px",
+    cursor: "pointer"
+  },
+
+  title: {
+    fontSize: "24px",
+    fontWeight: "500"
+  },
+
+  form: {
+    display: "flex",
+    flexDirection: "column",
+    gap: "18px"
+  },
+
+  input: {
+    background: "#151A3F",
+    border: "none",
+    padding: "16px",
+    borderRadius: "12px",
+    color: "#F3F4F8",
+    fontSize: "14px",
+    outline: "none"
+  },
+
+  forgot: {
+    textAlign: "right",
+    fontSize: "13px",
+    color: "#9C6BFF",
+    cursor: "pointer"
+  },
+
+  button: {
+    marginTop: "10px",
+    padding: "16px",
+    borderRadius: "14px",
+    border: "none",
+    fontSize: "16px",
+    fontWeight: "600",
+    color: "white",
+    background: "linear-gradient(90deg, #5E5BFF, #8A5CFF)",
+    cursor: "pointer"
+  },
+
+  switchText: {
+    marginTop: "25px",
+    fontSize: "14px",
+    color: "#ccc"
+  },
+
+  link: {
+    color: "#9C6BFF",
+    textDecoration: "none",
+    fontWeight: "500"
+  }
+}
+
+export default Login
