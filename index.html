@@ -1,6 +1,6 @@
 import { theme } from "../theme"
 
-function Login() {
+function Register() {
   const container = {
     background: theme.background,
     height: "100vh",
@@ -32,7 +32,8 @@ function Login() {
   return (
     <div style={container}>
       <div style={card}>
-        <h2>Login</h2>
+        <h2>Create Account</h2>
+        <input style={input} placeholder="Name" />
         <input style={input} placeholder="Email" />
         <input style={input} placeholder="Password" type="password" />
 
@@ -46,11 +47,11 @@ function Login() {
             border: "none"
           }}
         >
-          Login
+          Sign Up
         </button>
       </div>
     </div>
   )
 }
 
-export default Login
+export default Register
