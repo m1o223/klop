@@ -1,91 +1,69 @@
+import { useState } from "react"
 import { useNavigate } from "react-router-dom"
+import { createUserWithEmailAndPassword } from "firebase/auth"
+import { auth } from "../firebase"
 
-function Auth() {
+function Register() {
   const navigate = useNavigate()
 
+  const [email, setEmail] = useState("")
+  const [password, setPassword] = useState("")
+  const [confirmPassword, setConfirmPassword] = useState("")
+  const [error, setError] = useState("")
+
+  const handleRegister = async (e) => {
+    e.preventDefault()
+
+    if (!email || !password || !confirmPassword) {
+      setError("Please fill all fields")
+      return
+    }
+
+    if (password !== confirmPassword) {
+      setError("Passwords do not match")
+      return
+    }
+
+    try {
+      await createUserWithEmailAndPassword(auth, email, password)
+      navigate("/login")
+    } catch (err) {
+      setError(err.message)
+    }
+  }
+
   return (
-    <div style={styles.container}>
-      <div style={styles.content}>
-        <h1 style={styles.logo}>BlueMind</h1>
+    <div>
+      <h2>Create Account</h2>
 
-        <button style={styles.appleBtn}>
-           Continue with Apple
-        </button>
+      <form onSubmit={handleRegister}>
+        <input
+          type="email"
+          placeholder="Email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+        />
 
-        <button style={styles.googleBtn}>
-          Continue with Google
-        </button>
+        <input
+          type="password"
+          placeholder="Password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+        />
 
-        <button
-          style={styles.emailBtn}
-          onClick={() => navigate("/login")}
-        >
-          Continue with Email
-        </button>
-      </div>
+        <input
+          type="password"
+          placeholder="Confirm Password"
+          value={confirmPassword}
+          onChange={(e) => setConfirmPassword(e.target.value)}
+        />
+
+        <button type="submit">Sign Up</button>
+      </form>
+
+      {error && <p>{error}</p>}
     </div>
   )
 }
 
-const styles = {
-  container: {
-    height: "100vh",
-    background: "linear-gradient(180deg, #0B0F2A 0%, #0E1335 100%)",
-    display: "flex",
-    justifyContent: "center",
-    alignItems: "center",
-    padding: "30px",
-    fontFamily: "sans-serif"
-  },
-
-  content: {
-    width: "100%",
-    maxWidth: "350px",
-    display: "flex",
-    flexDirection: "column",
-    gap: "18px"
-  },
-
-  logo: {
-    color: "#F3F4F8",
-    fontSize: "32px",
-    fontWeight: "600",
-    textAlign: "center",
-    marginBottom: "40px"
-  },
-
-  appleBtn: {
-    padding: "16px",
-    borderRadius: "14px",
-    border: "none",
-    fontSize: "15px",
-    fontWeight: "500",
-    background: "#ffffff",
-    color: "#000000",
-    cursor: "pointer"
-  },
-
-  googleBtn: {
-    padding: "16px",
-    borderRadius: "14px",
-    border: "1px solid #333",
-    fontSize: "15px",
-    fontWeight: "500",
-    background: "#151A3F",
-    color: "#F3F4F8",
-    cursor: "pointer"
-  },
-
-  emailBtn: {
-    padding: "16px",
-    borderRadius: "14px",
-    border: "none",
-    fontSize: "15px",
-    fontWeight: "600",
-    background: "linear-gradient(90deg, #5E5BFF, #8A5CFF)",
-    color: "white",
-    cursor: "pointer"
-  }
-}
-
-export default Auth
+export default Register
