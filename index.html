@@ -1,34 +1,29 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import React from "react"
+import Sidebar from "./Sidebar"
+import "../styles/layout.css"
 
-import Auth from "./pages/Auth";
-import Login from "./pages/Login";
-import Register from "./pages/Register";
-import Chat from "./pages/Chat";
-import Home from "./pages/Home";
-
-function App() {
-  return (
-    <BrowserRouter>
-      <Routes>
-
-        {/* الصفحة الأولى */}
-        <Route path="/" element={<Auth />} />
-
-        {/* تسجيل الدخول */}
-        <Route path="/login" element={<Login />} />
-
-        {/* إنشاء حساب */}
-        <Route path="/register" element={<Register />} />
-
-        {/* صفحة الشات */}
-        <Route path="/home" element={<Chat />} />
-
-        {/* الصفحة الرئيسية لاحقاً */}
-        <Route path="/dashboard" element={<Home />} />
-
-      </Routes>
-    </BrowserRouter>
-  );
+type Props = {
+  children: React.ReactNode
 }
 
-export default App;
+function MainLayout({ children }: Props) {
+
+  return (
+
+    <div className="app-layout">
+
+      <Sidebar />
+
+      <main className="chat-area">
+
+        {children}
+
+      </main>
+
+    </div>
+
+  )
+
+}
+
+export default MainLayout
