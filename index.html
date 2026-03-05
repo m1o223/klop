@@ -1,1 +1,129 @@
+// src/ai/timeExtractor.js
 
+// استخراج الوقت النسبي مثل: بعد ساعة / بعد يوم
+export function extractRelativeTime(text) {
+
+  const lower = text.toLowerCase()
+
+  const now = new Date()
+
+  // بعد ساعة
+  if (lower.includes("بعد ساعة") || lower.includes("after one hour")) {
+
+    return new Date(now.getTime() + 60 * 60 * 1000)
+
+  }
+
+  // بعد نصف ساعة
+  if (lower.includes("بعد نصف ساعة") || lower.includes("after 30 minutes")) {
+
+    return new Date(now.getTime() + 30 * 60 * 1000)
+
+  }
+
+  // بعد دقائق
+  const minutesMatch = lower.match(/after (\d+) minutes|بعد (\d+) دقيقة/)
+
+  if (minutesMatch) {
+
+    const minutes = parseInt(minutesMatch[1] || minutesMatch[2])
+
+    return new Date(now.getTime() + minutes * 60 * 1000)
+
+  }
+
+  // بعد ساعات
+  const hoursMatch = lower.match(/after (\d+) hours|بعد (\d+) ساعات|بعد (\d+) ساعة/)
+
+  if (hoursMatch) {
+
+    const hours = parseInt(hoursMatch[1] || hoursMatch[2] || hoursMatch[3])
+
+    return new Date(now.getTime() + hours * 60 * 60 * 1000)
+
+  }
+
+  // بعد أيام
+  const daysMatch = lower.match(/after (\d+) days|بعد (\d+) يوم/)
+
+  if (daysMatch) {
+
+    const days = parseInt(daysMatch[1] || daysMatch[2])
+
+    return new Date(now.getTime() + days * 24 * 60 * 60 * 1000)
+
+  }
+
+  return null
+}
+
+
+// استخراج الساعة مثل: الساعة 7 مساء
+export function extractClockTime(text) {
+
+  const lower = text.toLowerCase()
+
+  const match = lower.match(/(\d{1,2})\s*(am|pm|صباح|مساء|ظهر)?/)
+
+  if (!match) return null
+
+  let hour = parseInt(match[1])
+
+  const period = match[2]
+
+  if (period) {
+
+    if (
+      period.includes("pm") ||
+      period.includes("مساء") ||
+      period.includes("ظهر")
+    ) {
+
+      if (hour < 12) hour += 12
+
+    }
+
+  }
+
+  return {
+    hour,
+    minute: 0
+  }
+
+}
+
+
+// اكتشاف التذكير المتكرر
+export function detectRecurring(text) {
+
+  const lower = text.toLowerCase()
+
+  if (
+    lower.includes("كل يوم") ||
+    lower.includes("every day")
+  ) {
+
+    return "daily"
+
+  }
+
+  if (
+    lower.includes("كل أسبوع") ||
+    lower.includes("every week")
+  ) {
+
+    return "weekly"
+
+  }
+
+  if (
+    lower.includes("كل شهر") ||
+    lower.includes("every month")
+  ) {
+
+    return "monthly"
+
+  }
+
+  return null
+}
