@@ -1,1 +1,77 @@
+const context = getContext(userId);
 
+// المستخدم كتب ساعة
+if (context && context.intent === "ask_time") {
+
+  const hourMatch = message.match(/\d+/);
+
+  if (hourMatch) {
+
+    let hour = parseInt(hourMatch[0]);
+
+    // إذا كتب pm أو مساء
+    if (
+      message.includes("pm") ||
+      message.includes("مساء") ||
+      message.includes("evening")
+    ) {
+      if (hour < 12) hour += 12;
+    }
+
+    // إذا كتب am أو صباح
+    if (
+      message.includes("am") ||
+      message.includes("صباح")
+    ) {
+      if (hour === 12) hour = 0;
+    }
+
+    // إذا كتب رقم فقط → نفترض صباح
+    if (
+      !message.includes("pm") &&
+      !message.includes("مساء") &&
+      !message.includes("am") &&
+      !message.includes("صباح")
+    ) {
+
+      // إذا الساعة > 12 فهي مساء تلقائي
+      if (hour > 12) {
+        hour = hour;
+      } else {
+
+        // نسأل للتأكيد
+        saveContext(userId, {
+          intent: "confirm_am_pm",
+          task: context.task,
+          date: context.date,
+          hour: hour
+        });
+
+        return res.json({
+          reply: `تقصد الساعة ${hour} صباحًا أم مساءً؟`
+        });
+
+      }
+
+    }
+
+    const reminderDate = new Date(context.date);
+    reminderDate.setHours(hour, 0, 0);
+
+    const reminder = await Reminder.create({
+      user: req.user._id,
+      title: context.task,
+      description: context.task,
+      date: reminderDate
+    });
+
+    clearContext(userId);
+
+    return res.json({
+      reply: `تمام 👍 سأذكرك الساعة ${hour}:00`,
+      reminder
+    });
+
+  }
+
+}
