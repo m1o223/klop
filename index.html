@@ -1,1 +1,58 @@
+import { parseMessage } from "../ai/intentParser.js";
+import Reminder from "../models/reminderModel.js";
 
+export const chat = async (req, res) => {
+
+  try {
+
+    const { message } = req.body;
+
+    // تحليل الرسالة بالذكاء الاصطناعي
+    const result = parseMessage(message);
+
+    // إنشاء تذكير
+    if (result.intent === "reminder") {
+
+      const reminder = await Reminder.create({
+        user: req.user._id,
+        text: result.text,
+        time: result.time
+      });
+
+      return res.json({
+        reply: `تمام، ذكرتك: ${result.text}`,
+        reminder
+      });
+
+    }
+
+    // عرض التذكيرات
+    if (result.intent === "list") {
+
+      const reminders = await Reminder.find({
+        user: req.user._id
+      });
+
+      return res.json({
+        reply: "هذه تذكيراتك",
+        reminders
+      });
+
+    }
+
+    // غير مفهوم
+    return res.json({
+      reply: "لم أفهم الطلب 🤔"
+    });
+
+  } catch (error) {
+
+    console.error(error);
+
+    res.status(500).json({
+      error: "Server error"
+    });
+
+  }
+
+};
