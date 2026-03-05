@@ -1,1 +1,66 @@
+// src/ai/timeExtractor.js
 
+export function extractTime(text) {
+
+  const lower = text.toLowerCase()
+
+  const now = new Date()
+
+  // بعد ساعة
+  if (lower.includes("بعد ساعة") || lower.includes("after one hour")) {
+    const date = new Date(now.getTime() + 60 * 60 * 1000)
+    return date
+  }
+
+  // بعد نصف ساعة
+  if (lower.includes("بعد نصف ساعة") || lower.includes("after 30 minutes")) {
+    const date = new Date(now.getTime() + 30 * 60 * 1000)
+    return date
+  }
+
+  // بعد 30 دقيقة
+  const minutesMatch = lower.match(/after (\d+) minutes|بعد (\d+) دقيقة/)
+
+  if (minutesMatch) {
+
+    const minutes = parseInt(minutesMatch[1] || minutesMatch[2])
+
+    const date = new Date(now.getTime() + minutes * 60 * 1000)
+
+    return date
+  }
+
+  // بعد ساعات
+  const hoursMatch = lower.match(/after (\d+) hours|بعد (\d+) ساعات|بعد (\d+) ساعة/)
+
+  if (hoursMatch) {
+
+    const hours = parseInt(hoursMatch[1] || hoursMatch[2] || hoursMatch[3])
+
+    const date = new Date(now.getTime() + hours * 60 * 60 * 1000)
+
+    return date
+  }
+
+  // بعد أيام
+  const daysMatch = lower.match(/after (\d+) days|بعد (\d+) يوم/)
+
+  if (daysMatch) {
+
+    const days = parseInt(daysMatch[1] || daysMatch[2])
+
+    const date = new Date(now.getTime() + days * 24 * 60 * 60 * 1000)
+
+    return date
+  }
+
+  // بعد أسبوع
+  if (lower.includes("بعد أسبوع") || lower.includes("after a week")) {
+
+    const date = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000)
+
+    return date
+  }
+
+  return null
+}
