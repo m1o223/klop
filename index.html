@@ -1,1 +1,12 @@
+// src/ai/timeExtractor.js
 
+export function extractTime(text) {
+
+  const match = text.match(/\b([0-9]{1,2})\b/)
+
+  if (match) {
+    return `${match[1]}:00`
+  }
+
+  return null
+}
