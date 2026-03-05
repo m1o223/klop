@@ -1,1 +1,18 @@
+const parsed = parseMessage(message);
 
+if (parsed.intent === "reminder") {
+  const reminder = await Reminder.create({
+    user: req.user._id,
+    title: parsed.task,
+    description: parsed.task,
+    date: parsed.time,
+    // إذا عندك field للتكرار بالموديل (اختياري)
+    // repeat: parsed.repeat
+  });
+
+  return res.json({
+    reply: `تمام ✅ رح أذكرك: ${parsed.task} \n⏰ ${parsed.timeISO}`,
+    reminder,
+    parsed
+  });
+}
