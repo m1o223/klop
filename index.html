@@ -1,1 +1,103 @@
+// Time parsing بسيط: (اليوم/بكرا/بعد X يوم/أيام الأسبوع) + (الساعة X) + تكرار كل يوم
+// يرجع object: { dateISO, hour, minute, needsAmPm, recurring }
 
+const weekDays = [
+  { ar: "الأحد", en: 0 },
+  { ar: "الاحد", en: 0 },
+  { ar: "الإثنين", en: 1 },
+  { ar: "الاثنين", en: 1 },
+  { ar: "الثلاثاء", en: 2 },
+  { ar: "الأربعاء", en: 3 },
+  { ar: "الاربعاء", en: 3 },
+  { ar: "الخميس", en: 4 },
+  { ar: "الجمعة", en: 5 },
+  { ar: "السبت", en: 6 },
+];
+
+function startOfDay(d) {
+  const x = new Date(d);
+  x.setHours(0, 0, 0, 0);
+  return x;
+}
+
+function nextWeekday(targetDow, from = new Date()) {
+  const d = startOfDay(from);
+  const current = d.getDay();
+  let diff = (targetDow - current + 7) % 7;
+  if (diff === 0) diff = 7; // next week if same day mentioned
+  d.setDate(d.getDate() + diff);
+  return d;
+}
+
+function parseHourMinute(text) {
+  // matches: "الساعة 9", "9:30", "الساعة 10:15"
+  const hm =
+    text.match(/(?:الساعة\s*)?(\d{1,2})(?:[:٫](\d{1,2}))?/);
+
+  if (!hm) return null;
+
+  let hour = parseInt(hm[1], 10);
+  let minute = hm[2] ? parseInt(hm[2], 10) : 0;
+
+  if (Number.isNaN(hour) || Number.isNaN(minute)) return null;
+  if (hour < 0 || hour > 23) return null;
+  if (minute < 0 || minute > 59) minute = 0;
+
+  // if hour is 1-12 and no AM/PM clue -> needs clarification
+  const hasAm = /صباح|am\b/i.test(text);
+  const hasPm = /مساء|pm\b|ليل/i.test(text);
+
+  let needsAmPm = false;
+
+  if (hour >= 1 && hour <= 12 && !hasAm && !hasPm) {
+    needsAmPm = true;
+  } else {
+    // apply AM/PM
+    if (hasPm && hour < 12) hour += 12;
+    if (hasAm && hour === 12) hour = 0;
+  }
+
+  return { hour, minute, needsAmPm };
+}
+
+export function extractTimeInfo(userText = "", now = new Date()) {
+  const text = userText.trim();
+
+  // recurring?
+  const recurringDaily = /كل\s*يوم/.test(text);
+
+  // base date
+  let date = startOfDay(now);
+
+  if (/بكرا|غداً|غدا/.test(text)) {
+    date.setDate(date.getDate() + 1);
+  } else if (/اليوم/.test(text)) {
+    // today already
+  } else {
+    // after X days
+    const after = text.match(/بعد\s*(\d+)\s*(يوم|أيام)/);
+    if (after) {
+      const days = parseInt(after[1], 10);
+      if (!Number.isNaN(days)) date.setDate(date.getDate() + days);
+    }
+
+    // weekday name
+    const day = weekDays.find(d => text.includes(d.ar));
+    if (day) date = nextWeekday(day.en, now);
+  }
+
+  // time
+  const hm = parseHourMinute(text);
+
+  // if recurring daily and no time -> ask time
+  const needsTime = recurringDaily && !hm;
+
+  return {
+    dateISO: date.toISOString(),
+    hour: hm?.hour ?? null,
+    minute: hm?.minute ?? null,
+    needsAmPm: hm?.needsAmPm ?? false,
+    needsTime,
+    recurring: recurringDaily ? { type: "daily" } : null,
+  };
+}
