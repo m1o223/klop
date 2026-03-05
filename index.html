@@ -1,1 +1,71 @@
+import express from "express";
+import { parseMessage } from "../ai/intentParser.js";
+import { parseWithAI } from "../ai/openaiParser.js";
+import Reminder from "../models/reminderModel.js";
+import { protect } from "../middlewares/authMiddleware.js";
 
+const router = express.Router();
+
+// AI message route
+router.post("/message", protect, async (req, res) => {
+
+  try {
+
+    const { message } = req.body;
+
+    if (!message) {
+      return res.status(400).json({
+        message: "Message is required"
+      });
+    }
+
+    // أولاً نحاول تحليل الرسالة باستخدام AI
+    let parsed = await parseWithAI(message);
+
+    // إذا فشل AI نستخدم parser المحلي
+    if (parsed.intent === "unknown") {
+      parsed = parseMessage(message);
+    }
+
+    // إذا كان الطلب reminder
+    if (parsed.intent === "reminder") {
+
+      const reminder = await Reminder.create({
+
+        user: req.user._id,
+
+        title: parsed.task || parsed.text,
+
+        description: parsed.task || parsed.text,
+
+        date: new Date(parsed.time)
+
+      });
+
+      return res.json({
+
+        reply: `تمام، ذكرتك: ${parsed.task || parsed.text}`,
+
+        reminder
+
+      });
+
+    }
+
+    return res.json({
+      reply: "لم أفهم الطلب."
+    });
+
+  } catch (error) {
+
+    console.log(error);
+
+    res.status(500).json({
+      message: "Server error"
+    });
+
+  }
+
+});
+
+export default router;
