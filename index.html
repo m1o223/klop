@@ -1,58 +1,47 @@
+import express from "express";
 import { parseMessage } from "../ai/intentParser.js";
 import Reminder from "../models/reminderModel.js";
+import { protect } from "../middlewares/authMiddleware.js";
 
-export const chat = async (req, res) => {
+const router = express.Router();
 
+// AI message route
+router.post("/message", protect, async (req, res) => {
   try {
 
     const { message } = req.body;
 
-    // تحليل الرسالة بالذكاء الاصطناعي
-    const result = parseMessage(message);
+    // تحليل الرسالة
+    const parsed = parseMessage(message);
 
-    // إنشاء تذكير
-    if (result.intent === "reminder") {
+    // إذا كان الطلب إنشاء تذكير
+    if (parsed.intent === "reminder") {
 
       const reminder = await Reminder.create({
         user: req.user._id,
-        text: result.text,
-        time: result.time
+        text: parsed.text,
+        time: parsed.time
       });
 
       return res.json({
-        reply: `تمام، ذكرتك: ${result.text}`,
+        reply: تمام، ذكرتك: ${parsed.text},
         reminder
       });
 
     }
 
-    // عرض التذكيرات
-    if (result.intent === "list") {
-
-      const reminders = await Reminder.find({
-        user: req.user._id
-      });
-
-      return res.json({
-        reply: "هذه تذكيراتك",
-        reminders
-      });
-
-    }
-
-    // غير مفهوم
+    // إذا لم يفهم الذكاء الاصطناعي
     return res.json({
-      reply: "لم أفهم الطلب 🤔"
+      reply: "لم أفهم الطلب."
     });
 
   } catch (error) {
-
     console.error(error);
 
     res.status(500).json({
-      error: "Server error"
+      message: "Server error"
     });
-
   }
+});
 
-};
+export default router;
