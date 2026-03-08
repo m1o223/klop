@@ -2,32 +2,24 @@ const API = "http://localhost:3000/api/reminders";
 
 export const getReminders = async (token) => {
 
-  if (!token) {
-    throw new Error("No auth token");
-  }
-
   const res = await fetch(API, {
     method: "GET",
     headers: {
+      "Content-Type": "application/json",
       Authorization: `Bearer ${token}`
     }
   });
 
-  const data = await res.json();
-
   if (!res.ok) {
-    throw new Error(data.message || "Failed to fetch reminders");
+    throw new Error("Failed to fetch reminders");
   }
 
-  return data;
+  return res.json();
 };
 
 
-export const createReminder = async (data, token) => {
 
-  if (!token) {
-    throw new Error("No auth token");
-  }
+export const createReminder = async (data, token) => {
 
   const res = await fetch(API, {
     method: "POST",
@@ -38,11 +30,9 @@ export const createReminder = async (data, token) => {
     body: JSON.stringify(data)
   });
 
-  const result = await res.json();
-
   if (!res.ok) {
-    throw new Error(result.message || "Failed to create reminder");
+    throw new Error("Failed to create reminder");
   }
 
-  return result;
+  return res.json();
 };
