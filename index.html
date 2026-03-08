@@ -1,37 +1,77 @@
-const API = "http://localhost:3000/api/reminders";
+import { useEffect, useState } from "react";
+import { auth } from "../config/firebase";
 
-export const getReminders = async (token) => {
+export default function Reminders() {
 
-  const res = await fetch(API, {
-    method: "GET",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`
-    }
-  });
+  const [reminders, setReminders] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  if (!res.ok) {
-    throw new Error("Failed to fetch reminders");
+  useEffect(() => {
+
+    const fetchReminders = async () => {
+      try {
+
+        const user = auth.currentUser;
+
+        if (!user) {
+          console.log("No user logged in");
+          setLoading(false);
+          return;
+        }
+
+        const token = await user.getIdToken();
+
+        const res = await fetch("http://localhost:3000/api/reminders", {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        });
+
+        const data = await res.json();
+
+        // مهم حتى لا يحدث خطأ map
+        setReminders(data.items || []);
+
+      } catch (err) {
+        console.error("Error loading reminders:", err);
+      }
+
+      setLoading(false);
+    };
+
+    fetchReminders();
+
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="reminders-container">
+        <p>Loading reminders...</p>
+      </div>
+    );
   }
 
-  return res.json();
-};
+  return (
+    <div className="reminders-container">
 
-export const createReminder = async (data, token) => {
+      <h2>Reminders</h2>
 
-  const res = await fetch(API, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`
-    },
-    body: JSON.stringify(data)
-  });
+      {reminders.length === 0 ? (
+        <p>No reminders yet</p>
+      ) : (
+        reminders.map((reminder) => (
+          <div key={reminder._id} className="reminder-card">
 
-  if (!res.ok) {
-    throw new Error("Failed to create reminder");
-  }
+            <h4>{reminder.title}</h4>
 
-  return res.json();
-};
-    
+            {reminder.description && (
+              <p>{reminder.description}</p>
+            )}
+
+          </div>
+        ))
+      )}
+
+    </div>
+  );
+}
