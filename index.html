@@ -1,1 +1,283 @@
+import { useState, useEffect } from "react"
+import { useNavigate } from "react-router-dom"
+import { auth } from "../config/firebase"
 
+// API URL
+const API = "http://localhost:3000/api/reminders"
+
+export default function Reminders() {
+
+const navigate = useNavigate()
+
+// ================================
+// STATES
+// ================================
+
+// قائمة التذكيرات
+const [reminders, setReminders] = useState([])
+
+// مودال الإضافة
+const [showModal, setShowModal] = useState(false)
+
+// edit id
+const [editId, setEditId] = useState(null)
+
+// title
+const [title, setTitle] = useState("")
+
+// description
+const [description, setDescription] = useState("")
+
+// ⚠️ هذا كان ناقص عندك
+const [date, setDate] = useState("")
+
+// ⚠️ هذا كان ناقص
+const [hour, setHour] = useState("")
+
+// ⚠️ هذا كان ناقص
+const [minute, setMinute] = useState("")
+
+// ⚠️ هذا كان ناقص
+const [recurring, setRecurring] = useState("")
+
+
+
+// ================================
+// GET TOKEN
+// ================================
+
+const getToken = async () => {
+
+const user = auth.currentUser
+
+if (!user) throw new Error("No user")
+
+return await user.getIdToken()
+
+}
+
+
+
+// ================================
+// FETCH REMINDERS
+// ================================
+
+const fetchReminders = async () => {
+
+try {
+
+const token = await getToken()
+
+const res = await fetch(API , {
+
+headers: {
+Authorization: `Bearer ${token}`
+}
+
+})
+
+const data = await res.json()
+
+// ⚠️ بعض الـ APIs ترجع data.items
+setReminders(Array.isArray(data) ? data : data.items || [])
+
+} catch (err) {
+
+console.error(err)
+
+}
+
+}
+
+
+
+// ================================
+// CREATE REMINDER
+// ================================
+
+const createReminder = async () => {
+
+try {
+
+const token = await getToken()
+
+const res = await fetch(API , {
+
+method: "POST",
+
+headers: {
+"Content-Type": "application/json",
+Authorization: `Bearer ${token}`
+},
+
+body: JSON.stringify({
+
+title,
+description,
+
+// ⚠️ هذا كان سبب الخطأ
+date,
+
+time: {
+hour: Number(hour),
+minute: Number(minute)
+},
+
+recurring: recurring || null,
+
+sent: false,
+isCompleted: false
+
+})
+
+})
+
+const data = await res.json()
+
+console.log(data)
+
+fetchReminders()
+
+setShowModal(false)
+
+} catch (err) {
+
+console.error(err)
+
+}
+
+}
+
+
+
+// ================================
+// UPDATE REMINDER
+// ================================
+
+const updateReminder = async () => {
+
+try {
+
+const token = await getToken()
+
+await fetch(`${API}/${editId}` , {
+
+method: "PUT",
+
+headers: {
+"Content-Type": "application/json",
+Authorization: `Bearer ${token}`
+},
+
+body: JSON.stringify({
+
+title,
+description,
+date,
+
+time: {
+hour: Number(hour),
+minute: Number(minute)
+},
+
+recurring: recurring || null
+
+})
+
+})
+
+fetchReminders()
+
+setShowModal(false)
+
+setEditId(null)
+
+} catch (err) {
+
+console.error(err)
+
+}
+
+}
+
+
+
+// ================================
+// DELETE REMINDER
+// ================================
+
+const deleteReminder = async (id) => {
+
+try {
+
+const token = await getToken()
+
+await fetch(`${API}/${id}` , {
+
+method: "DELETE",
+
+headers: {
+Authorization: `Bearer ${token}`
+}
+
+})
+
+fetchReminders()
+
+} catch (err) {
+
+console.error(err)
+
+}
+
+}
+
+
+
+// ================================
+// OPEN EDIT MODAL
+// ================================
+
+const openEdit = (reminder) => {
+
+// edit id
+setEditId(reminder._id)
+
+// title
+setTitle(reminder.title || "")
+
+// description
+setDescription(reminder.description || "")
+
+// ⚠️ هذا كان خطأ عندك
+// slice لا يعمل إذا كان Date
+setDate(
+reminder.date
+? new Date(reminder.date).toISOString().slice(0,10)
+: ""
+)
+
+// time
+setHour(reminder.time?.hour ?? "")
+
+setMinute(reminder.time?.minute ?? "")
+
+// recurring
+setRecurring(reminder.recurring || "")
+
+// open modal
+setShowModal(true)
+
+}
+
+
+
+// ================================
+// PAGE LOAD
+// ================================
+
+useEffect(() => {
+
+fetchReminders()
+
+}, [])
