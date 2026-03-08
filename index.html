@@ -1,1 +1,30 @@
+const createReminder = async () => {
 
+  const token = await getToken()
+
+  const res = await fetch(API, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`
+    },
+    body: JSON.stringify({
+      title: title,
+      description: description,
+      date: new Date(),
+
+      time: {
+        hour: 12,
+        minute: 0
+      },
+
+      recurring: null,
+
+      sent: false,
+      isCompleted: false
+    })
+  })
+
+  const data = await res.json()
+  console.log(data)
+}
