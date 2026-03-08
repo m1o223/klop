@@ -1,1 +1,300 @@
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { auth } from "../firebase";
+import "./Reminders.css";
 
+export default function Reminders() {
+
+const navigate = useNavigate();
+
+const API = "http://localhost:3000/api/reminders";
+
+const [reminders,setReminders] = useState([]);
+const [title,setTitle] = useState("");
+const [description,setDescription] = useState("");
+const [showModal,setShowModal] = useState(false);
+const [editId,setEditId] = useState(null);
+
+
+
+const getToken = async ()=>{
+
+const user = auth.currentUser;
+
+if(!user){
+throw new Error("No user");
+}
+
+return await user.getIdToken(true);
+
+};
+
+
+
+const fetchReminders = async ()=>{
+
+try{
+
+const token = await getToken();
+
+const res = await fetch(API,{
+headers:{
+Authorization:`Bearer ${token}`
+}
+});
+
+const data = await res.json();
+
+setReminders(data.items || []);
+
+}catch(err){
+
+console.log(err);
+
+}
+
+};
+
+
+
+useEffect(()=>{
+
+const unsubscribe = auth.onAuthStateChanged((user)=>{
+
+if(user){
+fetchReminders();
+}
+
+});
+
+return ()=>unsubscribe();
+
+},[]);
+
+
+
+const createReminder = async ()=>{
+
+try{
+
+const token = await getToken();
+
+await fetch(API,{
+method:"POST",
+headers:{
+"Content-Type":"application/json",
+Authorization:`Bearer ${token}`
+},
+body:JSON.stringify({
+title,
+description
+})
+});
+
+setTitle("");
+setDescription("");
+setShowModal(false);
+
+fetchReminders();
+
+}catch(err){
+
+console.log(err);
+
+}
+
+};
+
+
+
+const deleteReminder = async(id)=>{
+
+try{
+
+const token = await getToken();
+
+await fetch(`${API}/${id}`,{
+method:"DELETE",
+headers:{
+Authorization:`Bearer ${token}`
+}
+});
+
+fetchReminders();
+
+}catch(err){
+
+console.log(err);
+
+}
+
+};
+
+
+
+const startEdit = (r)=>{
+
+setEditId(r._id);
+setTitle(r.title);
+setDescription(r.description);
+setShowModal(true);
+
+};
+
+
+
+const updateReminder = async ()=>{
+
+try{
+
+const token = await getToken();
+
+await fetch(`${API}/${editId}`,{
+method:"PUT",
+headers:{
+"Content-Type":"application/json",
+Authorization:`Bearer ${token}`
+},
+body:JSON.stringify({
+title,
+description
+})
+});
+
+setEditId(null);
+setTitle("");
+setDescription("");
+setShowModal(false);
+
+fetchReminders();
+
+}catch(err){
+
+console.log(err);
+
+}
+
+};
+
+
+
+return (
+
+<div className="page">
+
+<div className="header">
+
+<button
+className="back"
+onClick={()=>navigate("/chat")}
+>
+←
+</button>
+
+<h1>Reminders</h1>
+
+<button
+className="add"
+onClick={()=>setShowModal(true)}
+>
+Add
+</button>
+
+</div>
+
+
+
+<div className="grid">
+
+{reminders.length === 0 && (
+
+<p className="empty">
+No reminders yet
+</p>
+
+)}
+
+
+
+{reminders.map((r)=>(
+<div
+key={r._id}
+className="card"
+>
+
+<h3>{r.title}</h3>
+
+<p>{r.description}</p>
+
+<div className="actions">
+
+<button
+onClick={()=>startEdit(r)}
+>
+Edit
+</button>
+
+<button
+onClick={()=>deleteReminder(r._id)}
+>
+Delete
+</button>
+
+</div>
+
+</div>
+))}
+
+</div>
+
+
+
+{showModal && (
+
+<div className="modal">
+
+<div className="modalBox">
+
+<h2>
+{editId ? "Edit Reminder" : "New Reminder"}
+</h2>
+
+<input
+placeholder="Title"
+value={title}
+onChange={(e)=>setTitle(e.target.value)}
+/>
+
+<textarea
+placeholder="Description"
+value={description}
+onChange={(e)=>setDescription(e.target.value)}
+/>
+
+<div className="modalButtons">
+
+<button
+onClick={()=>setShowModal(false)}
+>
+Cancel
+</button>
+
+<button
+onClick={editId ? updateReminder : createReminder}
+>
+Save
+</button>
+
+</div>
+
+</div>
+
+</div>
+
+)}
+
+</div>
+
+);
+
+}
