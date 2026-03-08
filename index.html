@@ -1,75 +1,146 @@
 import { useEffect, useState } from "react";
 import { auth } from "../config/firebase";
+import "./Reminders.css";
 
 export default function Reminders() {
 
   const [reminders, setReminders] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
+
+  // تحميل التذكيرات
+  const fetchReminders = async () => {
+
+    const user = auth.currentUser;
+
+    if (!user) return;
+
+    const token = await user.getIdToken();
+
+    const res = await fetch("http://localhost:3000/api/reminders", {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    });
+
+    const data = await res.json();
+
+    setReminders(data.items || []);
+  };
 
   useEffect(() => {
-
-    const fetchReminders = async () => {
-      try {
-
-        const user = auth.currentUser;
-
-        if (!user) {
-          console.log("No user logged in");
-          setLoading(false);
-          return;
-        }
-
-        const token = await user.getIdToken();
-
-        const res = await fetch("http://localhost:3000/api/reminders", {
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
-        });
-
-        const data = await res.json();
-
-        // مهم حتى لا يحدث خطأ map
-        setReminders(data.items || []);
-
-      } catch (err) {
-        console.error("Error loading reminders:", err);
-      }
-
-      setLoading(false);
-    };
-
     fetchReminders();
-
   }, []);
 
-  if (loading) {
-    return (
-      <div className="reminders-container">
-        <p>Loading reminders...</p>
-      </div>
-    );
-  }
+  // إضافة Reminder
+  const handleAdd = async () => {
+
+    const user = auth.currentUser;
+    if (!user) return;
+
+    const token = await user.getIdToken();
+
+    await fetch("http://localhost:3000/api/reminders", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`
+      },
+      body: JSON.stringify({
+        title,
+        description
+      })
+    });
+
+    setTitle("");
+    setDescription("");
+
+    fetchReminders();
+  };
+
+  // حذف Reminder
+  const handleDelete = async (id) => {
+
+    const user = auth.currentUser;
+    if (!user) return;
+
+    const token = await user.getIdToken();
+
+    await fetch(`http://localhost:3000/api/reminders/${id}`, {
+      method: "DELETE",
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    });
+
+    fetchReminders();
+  };
 
   return (
     <div className="reminders-container">
 
-      <h2>Reminders</h2>
+      <div className="reminders-header">
+        <h2>Reminders</h2>
+      </div>
+
+      {/* إضافة Reminder */}
+
+      <div className="add-reminder-box">
+
+        <input
+          placeholder="Title"
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+        />
+
+        <input
+          placeholder="Description"
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
+        />
+
+        <button type="button" onClick={handleAdd}>
+          Add Reminder
+        </button>
+
+      </div>
+
+      {/* عرض التذكيرات */}
 
       {reminders.length === 0 ? (
-        <p>No reminders yet</p>
+
+        <p className="empty">No reminders yet</p>
+
       ) : (
-        reminders.map((reminder) => (
-          <div key={reminder._id} className="reminder-card">
 
-            <h4>{reminder.title}</h4>
+        <div className="reminders-grid">
 
-            {reminder.description && (
+          {reminders.map((reminder) => (
+
+            <div key={reminder._id} className="reminder-card">
+
+              <h3>{reminder.title}</h3>
+
               <p>{reminder.description}</p>
-            )}
 
-          </div>
-        ))
+              <div className="actions">
+
+                <button
+                  type="button"
+                  className="delete"
+                  onClick={() => handleDelete(reminder._id)}
+                >
+                  Delete
+                </button>
+
+              </div>
+
+            </div>
+
+          ))}
+
+        </div>
+
       )}
 
     </div>
