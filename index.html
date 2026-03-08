@@ -1,1 +1,321 @@
+import { useEffect, useState } from "react";
 
+const API = "http://localhost:3000/api/reminders";
+
+export default function Reminders() {
+
+  const [reminders, setReminders] = useState([]);
+  const [showModal, setShowModal] = useState(false);
+
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
+
+  const [date, setDate] = useState("");
+  const [hour, setHour] = useState("");
+  const [minute, setMinute] = useState("");
+
+  const [editId, setEditId] = useState(null);
+
+  /*
+  ============================
+  GET TOKEN
+  ============================
+  */
+
+  async function getToken() {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      throw new Error("No user");
+    }
+    return token;
+  }
+
+  /*
+  ============================
+  FETCH REMINDERS
+  ============================
+  */
+
+  async function fetchReminders() {
+    try {
+
+      const token = await getToken();
+
+      const res = await fetch(API, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+
+      const data = await res.json();
+
+      setReminders(data.items || []);
+
+    } catch (err) {
+      console.error(err);
+    }
+  }
+
+  /*
+  ============================
+  CREATE REMINDER
+  ============================
+  */
+
+  async function createReminder() {
+
+    try {
+
+      const token = await getToken();
+
+      const res = await fetch(API, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          title,
+          description,
+          date,
+          time: {
+            hour: Number(hour),
+            minute: Number(minute)
+          }
+        })
+      });
+
+      if (!res.ok) {
+        throw new Error("Create failed");
+      }
+
+      setShowModal(false);
+
+      setTitle("");
+      setDescription("");
+      setDate("");
+      setHour("");
+      setMinute("");
+
+      fetchReminders();
+
+    } catch (err) {
+      console.error(err);
+    }
+  }
+
+  /*
+  ============================
+  UPDATE REMINDER
+  ============================
+  */
+
+  async function updateReminder() {
+
+    try {
+
+      const token = await getToken();
+
+      const res = await fetch(`${API}/${editId}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          title,
+          description,
+          date,
+          time: {
+            hour: Number(hour),
+            minute: Number(minute)
+          }
+        })
+      });
+
+      if (!res.ok) {
+        throw new Error("Update failed");
+      }
+
+      setShowModal(false);
+
+      setEditId(null);
+
+      fetchReminders();
+
+    } catch (err) {
+      console.error(err);
+    }
+  }
+
+  /*
+  ============================
+  DELETE REMINDER
+  ============================
+  */
+
+  async function deleteReminder(id) {
+
+    try {
+
+      const token = await getToken();
+
+      await fetch(`${API}/${id}`, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+
+      fetchReminders();
+
+    } catch (err) {
+      console.error(err);
+    }
+  }
+
+  /*
+  ============================
+  OPEN EDIT MODAL
+  ============================
+  */
+
+  function openEdit(reminder) {
+
+    setEditId(reminder._id);
+
+    setTitle(reminder.title || "");
+    setDescription(reminder.description || "");
+
+    setDate(reminder.date?.slice(0,10) || "");
+
+    setHour(reminder.time?.hour || "");
+    setMinute(reminder.time?.minute || "");
+
+    setShowModal(true);
+  }
+
+  /*
+  ============================
+  PAGE LOAD
+  ============================
+  */
+
+  useEffect(() => {
+    fetchReminders();
+  }, []);
+
+  /*
+  ============================
+  UI
+  ============================
+  */
+
+  return (
+
+    <div>
+
+      <h1>Reminders</h1>
+
+      <button
+        type="button"
+        onClick={() => {
+
+          setShowModal(true);
+
+          setEditId(null);
+
+          setTitle("");
+          setDescription("");
+          setDate("");
+          setHour("");
+          setMinute("");
+
+        }}
+      >
+        Add
+      </button>
+
+      {reminders.length === 0 && (
+        <p>No reminders yet</p>
+      )}
+
+      {reminders.map((r) => (
+
+        <div key={r._id}>
+
+          <h3>{r.title}</h3>
+
+          <p>{r.description}</p>
+
+          <p>Date: {r.date?.slice(0,10)}</p>
+
+          <button onClick={() => openEdit(r)}>
+            Edit
+          </button>
+
+          <button onClick={() => deleteReminder(r._id)}>
+            Delete
+          </button>
+
+        </div>
+
+      ))}
+
+      {showModal && (
+
+        <div>
+
+          <h2>New Reminder</h2>
+
+          <input
+            placeholder="Title"
+            value={title}
+            onChange={(e)=>setTitle(e.target.value)}
+          />
+
+          <textarea
+            placeholder="Description"
+            value={description}
+            onChange={(e)=>setDescription(e.target.value)}
+          />
+
+          <input
+            type="date"
+            value={date}
+            onChange={(e)=>setDate(e.target.value)}
+          />
+
+          <input
+            type="number"
+            placeholder="Hour"
+            value={hour}
+            onChange={(e)=>setHour(e.target.value)}
+          />
+
+          <input
+            type="number"
+            placeholder="Minute"
+            value={minute}
+            onChange={(e)=>setMinute(e.target.value)}
+          />
+
+          <button
+            onClick={editId ? updateReminder : createReminder}
+          >
+            Save
+          </button>
+
+          <button
+            onClick={()=>setShowModal(false)}
+          >
+            Cancel
+          </button>
+
+        </div>
+
+      )}
+
+    </div>
+  );
+}
