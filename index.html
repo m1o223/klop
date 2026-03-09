@@ -1,1 +1,19 @@
+import { askAI } from "./openaiParser.js"
 
+export async function summarizeConversation(messages) {
+
+  const text = messages
+    .map(m => `${m.role}: ${m.content}`)
+    .join("\n")
+
+  const prompt = `
+Summarize this conversation in one short paragraph.
+
+Conversation:
+${text}
+`
+
+  const summary = await askAI(prompt)
+
+  return summary
+}
