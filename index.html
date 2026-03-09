@@ -1,19 +1,41 @@
-import { askAI } from "./openaiParser.js"
+const API = "http://localhost:3000/api/reminders"
 
-export async function summarizeConversation(messages) {
+function getToken() {
+  return localStorage.getItem("token")
+}
 
-  const text = messages
-    .map(m => `${m.role}: ${m.content}`)
-    .join("\n")
+export async function getReminders() {
 
-  const prompt = `
-Summarize this conversation in one short paragraph.
+  const res = await fetch(API, {
+    headers: {
+      Authorization: `Bearer ${getToken()}`
+    }
+  })
 
-Conversation:
-${text}
-`
+  return res.json()
 
-  const summary = await askAI(prompt)
+}
 
-  return summary
+export async function createReminder(reminder) {
+
+  await fetch(API, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${getToken()}`
+    },
+    body: JSON.stringify(reminder)
+  })
+
+}
+
+export async function deleteReminder(id) {
+
+  await fetch(`${API}/${id}`, {
+    method: "DELETE",
+    headers: {
+      Authorization: `Bearer ${getToken()}`
+    }
+  })
+
 }
