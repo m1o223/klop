@@ -1,1 +1,20 @@
+const API = "http://localhost:3000"
 
+export async function sendMessage(message, token){
+
+const res = await fetch(`${API}/api/ai/chat`,{
+
+method:"POST",
+
+headers:{
+"Content-Type":"application/json",
+Authorization:`Bearer ${token}`
+},
+
+body:JSON.stringify({message})
+
+})
+
+return res.json()
+
+}
