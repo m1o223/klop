@@ -1,1 +1,43 @@
+import axios from "axios"
 
+const API_URL = "http://localhost:3000/api/reminders"
+
+const getToken = () => {
+  return localStorage.getItem("token")
+}
+
+export const getReminders = async () => {
+  const res = await axios.get(API_URL, {
+    headers: {
+      Authorization: `Bearer ${getToken()}`
+    }
+  })
+  return res.data.items
+}
+
+export const createReminder = async (data) => {
+  const res = await axios.post(API_URL, data, {
+    headers: {
+      Authorization: `Bearer ${getToken()}`
+    }
+  })
+  return res.data
+}
+
+export const deleteReminder = async (id) => {
+  const res = await axios.delete(`${API_URL}/${id}`, {
+    headers: {
+      Authorization: `Bearer ${getToken()}`
+    }
+  })
+  return res.data
+}
+
+export const updateReminder = async (id,data) => {
+  const res = await axios.put(`${API_URL}/${id}`, data, {
+    headers: {
+      Authorization: `Bearer ${getToken()}`
+    }
+  })
+  return res.data
+}
