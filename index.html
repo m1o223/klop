@@ -1,24 +1,188 @@
-const API="http://localhost:3000/api/reminders";
+import { useEffect, useState } from "react";
+import { getReminders } from "../api/remindersApi";
+import "./Reminders.css";
 
-export const getReminders = async (token)=>{
+export default function Reminders() {
 
-const res = await fetch(API,{
+  const [reminders,setReminders] = useState([]);
+  const [filter,setFilter] = useState("all");
+  const [search,setSearch] = useState("");
+  const [menu,setMenu] = useState(null);
+  const [notifMenu,setNotifMenu] = useState(false);
 
-headers:{
+  useEffect(()=>{
+     loadReminders();
+  },[]);
 
-"Content-Type":"application/json",
-Authorization:`Bearer ${token}`
+  const loadReminders = async ()=>{
+     try{
+        const token = localStorage.getItem("token");
+        const data = await getReminders(token);
+        setReminders(data.items || data);
+     }catch(err){
+        console.log(err);
+     }
+  };
 
+  const today = new Date().toISOString().split("T")[0];
+
+  const filtered = reminders
+  .filter(r=>{
+      if(filter === "today") return r.date.startsWith(today);
+      if(filter === "upcoming") return new Date(r.date) > new Date();
+      return true;
+  })
+  .filter(r=>{
+      if(!search) return true;
+      return r.title.toLowerCase().includes(search.toLowerCase());
+  });
+
+  return (
+
+  <div className="reminders-container">
+
+      <div className="reminders-box">
+
+        {/* Header */}
+
+        <div className="reminders-header">
+
+            <h1>My Reminders</h1>
+
+            <div className="bell-area">
+
+              <button 
+              className="bell-btn"
+              onClick={()=>setNotifMenu(!notifMenu)}
+              >
+              🔔
+              </button>
+
+              {notifMenu && (
+
+                <div className="notif-menu">
+
+                    <button>
+                    🔔 Allow notifications
+                    </button>
+
+                    <button>
+                    🔕 Disable notifications
+                    </button>
+
+                </div>
+
+              )}
+
+            </div>
+
+        </div>
+
+        {/* Create */}
+
+        <button className="create-btn">
+        + Create Reminder
+        </button>
+
+
+        {/* Search */}
+
+        <input
+        className="search"
+        placeholder="Search reminder..."
+        value={search}
+        onChange={(e)=>setSearch(e.target.value)}
+        />
+
+
+        {/* Filters */}
+
+        <div className="filters">
+
+            <button
+            className={filter==="all"?"active":""}
+            onClick={()=>setFilter("all")}
+            >
+            All
+            </button>
+
+            <button
+            className={filter==="today"?"active":""}
+            onClick={()=>setFilter("today")}
+            >
+            Today
+            </button>
+
+            <button
+            className={filter==="upcoming"?"active":""}
+            onClick={()=>setFilter("upcoming")}
+            >
+            Upcoming
+            </button>
+
+        </div>
+
+
+        {/* Reminders list */}
+
+        <div className="reminders-list">
+
+        {filtered.map((rem)=>(
+          
+          <div key={rem._id} className="reminder-card">
+
+            <div className="card-left">
+
+              <h3>{rem.title}</h3>
+
+              <p>
+
+              {rem.date} • {rem.time?.hour}:{rem.time?.minute}
+
+              </p>
+
+              <span>
+
+              🔔 Remind {rem.remindBefore} min before
+
+              </span>
+
+            </div>
+
+
+            <div className="card-right">
+
+              <button
+              className="dots"
+              onClick={()=>setMenu(menu===rem._id ? null : rem._id)}
+              >
+              ⋮
+              </button>
+
+              {menu===rem._id && (
+
+                <div className="menu">
+
+                  <button>Edit</button>
+                  <button className="delete">
+                  Delete
+                  </button>
+
+                </div>
+
+              )}
+
+            </div>
+
+          </div>
+
+        ))}
+
+        </div>
+
+      </div>
+
+  </div>
+
+  );
 }
-
-});
-
-if(!res.ok){
-
-throw new Error("Failed to fetch reminders");
-
-}
-
-return res.json();
-
-};
