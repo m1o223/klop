@@ -1,14 +1,15 @@
 <TimePicker
-onChange={(time) => {
-if (!time) return;
+  disableClock={true}
+  onChange={(time) => {
+    if (!time) return;
 
-const [hour, minute] = time.split(":");
+    const [hour, minute] = time.split(":");
 
-setForm({
-...form,
-hour,
-minute
-});
-}}
-value={`${form.hour || "00"}:${form.minute || "00"}`}
+    setForm({
+      ...form,
+      hour,
+      minute
+    });
+  }}
+  value={`${form.hour || "00"}:${form.minute || "00"}`}
 />
