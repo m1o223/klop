@@ -1,70 +1,12 @@
-const API = "http://localhost:3000/api/reminders";
+<TimePicker
+onChange={(time) => {
+const [hour, minute] = time.split(":");
 
-const getAuthHeaders = (token) => ({
-  "Content-Type": "application/json",
-  Authorization: `Bearer ${token}`,
+setForm({
+...form,
+hour,
+minute
 });
-
-export const getReminders = async (token) => {
-  const res = await fetch(API, {
-    method: "GET",
-    headers: getAuthHeaders(token),
-  });
-
-  const data = await res.json();
-
-  if (!res.ok) {
-    throw new Error(data.message || "Failed to fetch reminders");
-  }
-
-  return data;
-};
-
-export const createReminder = async (payload, token) => {
-  const res = await fetch(API, {
-    method: "POST",
-    headers: getAuthHeaders(token),
-    body: JSON.stringify(payload),
-  });
-
-  const data = await res.json();
-
-  if (!res.ok) {
-    throw new Error(data.message || "Failed to create reminder");
-  }
-
-  return data;
-};
-
-export const updateReminder = async (id, payload, token) => {
-  const res = await fetch(`${API}/${id}`, {
-    method: "PUT",
-    headers: getAuthHeaders(token),
-    body: JSON.stringify(payload),
-  });
-
-  const data = await res.json();
-
-  if (!res.ok) {
-    throw new Error(data.message || "Failed to update reminder");
-  }
-
-  return data;
-};
-
-export const deleteReminder = async (id, token) => {
-  const res = await fetch(`${API}/${id}`, {
-    method: "DELETE",
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  });
-
-  const data = await res.json();
-
-  if (!res.ok) {
-    throw new Error(data.message || "Failed to delete reminder");
-  }
-
-  return data;
-};
+}}
+value={`${form.hour}:${form.minute}`}
+/>
