@@ -1,8 +1,6 @@
 <TimePicker
-  disableClock={true}
+  value={`${form.hour || "00"}:${form.minute || "00"}`}
   onChange={(time) => {
-    if (!time) return;
-
     const [hour, minute] = time.split(":");
 
     setForm({
@@ -11,5 +9,4 @@
       minute
     });
   }}
-  value={`${form.hour || "00"}:${form.minute || "00"}`}
 />
