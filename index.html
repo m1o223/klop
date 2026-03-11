@@ -1,43 +1,24 @@
-import axios from "axios"
+const API="http://localhost:3000/api/reminders";
 
-const API_URL = "http://localhost:3000/api/reminders"
+export const getReminders = async (token)=>{
 
-const getToken = () => {
-  return localStorage.getItem("token")
+const res = await fetch(API,{
+
+headers:{
+
+"Content-Type":"application/json",
+Authorization:`Bearer ${token}`
+
 }
 
-export const getReminders = async () => {
-  const res = await axios.get(API_URL, {
-    headers: {
-      Authorization: `Bearer ${getToken()}`
-    }
-  })
-  return res.data.items
+});
+
+if(!res.ok){
+
+throw new Error("Failed to fetch reminders");
+
 }
 
-export const createReminder = async (data) => {
-  const res = await axios.post(API_URL, data, {
-    headers: {
-      Authorization: `Bearer ${getToken()}`
-    }
-  })
-  return res.data
-}
+return res.json();
 
-export const deleteReminder = async (id) => {
-  const res = await axios.delete(`${API_URL}/${id}`, {
-    headers: {
-      Authorization: `Bearer ${getToken()}`
-    }
-  })
-  return res.data
-}
-
-export const updateReminder = async (id,data) => {
-  const res = await axios.put(`${API_URL}/${id}`, data, {
-    headers: {
-      Authorization: `Bearer ${getToken()}`
-    }
-  })
-  return res.data
-}
+};
