@@ -1,1 +1,121 @@
+/* ========================================================= */
+/* ===================== IMPORTS ============================ */
+/* ==================== الاستيرادات ======================== */
+/* ========================================================= */
 
+import { useEffect, useMemo, useRef, useState } from "react";
+
+import {
+  getReminders,
+  createReminder,
+  updateReminder,
+  deleteReminder,
+} from "../api/remindersApi";
+
+import "./Reminders.css";
+
+
+/* ========================================================= */
+/* ================= REMINDERS PAGE ======================== */
+/* ================= صفحة التذكيرات ======================== */
+/* ========================================================= */
+
+export default function Reminders() {
+
+
+/* ========================================================= */
+/* ================= MAIN UI STATE ========================= */
+/* ================= حالات الواجهة الأساسية ================= */
+/* ========================================================= */
+
+const [showModal, setShowModal] = useState(false)
+const [reminders, setReminders] = useState([])
+const [filter, setFilter] = useState("all")
+const [search, setSearch] = useState("")
+const [menuOpenId, setMenuOpenId] = useState(null)
+
+const [notifMenuOpen, setNotifMenuOpen] = useState(false)
+const [notificationsEnabled, setNotificationsEnabled] = useState(false)
+
+const [editingId, setEditingId] = useState(null)
+const [loading, setLoading] = useState(false)
+
+
+/* ========================================================= */
+/* ================= FORM STATE ============================ */
+/* ================= حالة الفورم =========================== */
+/* ========================================================= */
+
+const [form, setForm] = useState({
+title:"",
+description:"",
+date:"",
+hour:"",
+minute:"",
+remindBefore:5
+})
+
+
+/* ========================================================= */
+/* ================= TIME STATE ============================ */
+/* ================= حالات الوقت =========================== */
+/* ========================================================= */
+
+const [hour, setHour] = useState("00")
+const [minute, setMinute] = useState("00")
+
+const [showHour, setShowHour] = useState(false)
+const [showMinute, setShowMinute] = useState(false)
+
+
+/* ========================================================= */
+/* ================= DATE STATE ============================ */
+/* ================= حالات التاريخ ========================= */
+/* ========================================================= */
+
+const [month, setMonth] = useState("01")
+const [day, setDay] = useState("01")
+const [year, setYear] = useState("2026")
+
+const [showDatePicker, setShowDatePicker] = useState(false)
+
+
+/* ========================================================= */
+/* ================= REFS ================================ */
+/* ================= مراجع الضغط الخارجي ================= */
+/* ========================================================= */
+
+const datePickerRef = useRef(null)
+const dateInputRef = useRef(null)
+
+const hourRef = useRef(null)
+const minuteRef = useRef(null)
+
+const notifMenuRef = useRef(null)
+const menuRef = useRef(null)
+
+
+/* ========================================================= */
+/* ================= HELPER FUNCTIONS ===================== */
+/* ================= دوال مساعدة ========================= */
+/* ========================================================= */
+
+const pad = (num)=>{
+return String(num).padStart(2,"0")
+}
+
+
+const todayDate = ()=>{
+return new Date().toISOString().slice(0,10)
+}
+
+
+/* ========================================================= */
+/* ================= INITIAL LOAD ========================= */
+/* ================= تحميل التذكيرات ===================== */
+/* ========================================================= */
+
+useEffect(()=>{
+loadReminders()
+checkNotificationPermission()
+},[])
