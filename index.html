@@ -1,1 +1,17 @@
+export const scheduleReminder = (reminder) => {
+  const now = new Date();
+  const reminderTime = new Date(
+    `${reminder.date}T${reminder.time}`
+  );
 
+  const delay = reminderTime - now;
+
+  if (delay <= 0) {
+    console.log("Reminder time already passed");
+    return;
+  }
+
+  setTimeout(() => {
+    console.log("🔔 Reminder:", reminder.title);
+  }, delay);
+};
