@@ -1,17 +1,86 @@
+//////////////////////////////////////////////////////////////
+// REMINDER ENGINE
+// schedules reminders using setTimeout
+//////////////////////////////////////////////////////////////
+
 export const scheduleReminder = (reminder) => {
-  const now = new Date();
-  const reminderTime = new Date(
-    `${reminder.date}T${reminder.time}`
-  );
 
-  const delay = reminderTime - now;
+  try {
 
-  if (delay <= 0) {
-    console.log("Reminder time already passed");
-    return;
+    if (!reminder) {
+      console.log("Reminder not provided");
+      return;
+    }
+
+    if (!reminder.date || !reminder.time) {
+      console.log("Reminder missing date or time");
+      return;
+    }
+
+    //////////////////////////////////////////////////////
+    // Build reminder date
+    //////////////////////////////////////////////////////
+
+    let reminderDate;
+
+    if (typeof reminder.time === "object") {
+
+      reminderDate = new Date(reminder.date);
+
+      reminderDate.setHours(reminder.time.hour || 0);
+      reminderDate.setMinutes(reminder.time.minute || 0);
+      reminderDate.setSeconds(0);
+
+    } else {
+
+      reminderDate = new Date(`${reminder.date}T${reminder.time}`);
+
+    }
+
+    const now = new Date();
+
+    const delay = reminderDate - now;
+
+    //////////////////////////////////////////////////////
+    // Check if reminder time already passed
+    //////////////////////////////////////////////////////
+
+    if (delay <= 0) {
+
+      console.log(
+        `Reminder "${reminder.title}" time already passed`
+      );
+
+      return;
+
+    }
+
+    console.log(
+      `Reminder scheduled: "${reminder.title}" in ${delay / 1000} seconds`
+    );
+
+    //////////////////////////////////////////////////////
+    // Schedule reminder
+    //////////////////////////////////////////////////////
+
+    setTimeout(() => {
+
+      console.log("🔔 REMINDER TRIGGERED");
+
+      console.log("Title:", reminder.title);
+
+      console.log("Description:", reminder.description || "No description");
+
+      console.log("Date:", reminder.date);
+
+      console.log("Time:", reminder.time);
+
+    }, delay);
+
+  } catch (error) {
+
+    console.error("Reminder Engine Error:", error);
+
   }
 
-  setTimeout(() => {
-    console.log("🔔 Reminder:", reminder.title);
-  }, delay);
 };
