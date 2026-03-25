@@ -1,1 +1,293 @@
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { ArrowLeft, MoreVertical } from "lucide-react";
+import "./Reminders.css";
 
+import {
+  getReminders,
+  createReminder,
+  updateReminder,
+  deleteReminder,
+} from "../api/remindersApi";
+
+export default function Reminders() {
+  const navigate = useNavigate();
+  const token = localStorage.getItem("token");
+
+  const [reminders, setReminders] = useState([]);
+  const [showModal, setShowModal] = useState(false);
+  const [editingId, setEditingId] = useState(null);
+  const [openMenuId, setOpenMenuId] = useState(null);
+
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
+  const [date, setDate] = useState("");
+  const [hour, setHour] = useState("");
+  const [minute, setMinute] = useState("");
+  const [before, setBefore] = useState("5");
+
+  // reset form
+  const resetForm = () => {
+    setTitle("");
+    setDescription("");
+    setDate("");
+    setHour("");
+    setMinute("");
+    setBefore("5");
+    setEditingId(null);
+  };
+
+  const closeModal = () => {
+    setShowModal(false);
+    resetForm();
+  };
+
+  // format time
+  const formatTime = (time) => {
+    if (!time) return "";
+    const h = String(time.hour ?? 0).padStart(2, "0");
+    const m = String(time.minute ?? 0).padStart(2, "0");
+    return `${h}:${m}`;
+  };
+
+  // notification
+  const showNotification = (title, body) => {
+    if (Notification.permission === "granted") {
+      new Notification(title, { body });
+    }
+  };
+
+  // load reminders
+  const loadReminders = async () => {
+    try {
+      const data = await getReminders(token);
+      setReminders(data.items || []);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  useEffect(() => {
+    if (token) loadReminders();
+  }, [token]);
+
+  // request permission
+  useEffect(() => {
+    if (Notification.permission !== "granted") {
+      Notification.requestPermission();
+    }
+  }, []);
+
+  // check reminders
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const now = new Date();
+
+      reminders.forEach((r) => {
+        if (!r.time) return;
+
+        const reminderTime = new Date(r.date);
+        reminderTime.setHours(r.time.hour);
+        reminderTime.setMinutes(r.time.minute);
+
+        const diff = reminderTime - now;
+
+        if (diff < before * 60000 && diff > 0) {
+          showNotification(
+            r.title,
+            r.description || "Reminder time"
+          );
+        }
+      });
+    }, 60000);
+
+    return () => clearInterval(interval);
+  }, [reminders, before]);
+
+  // delete
+  const handleDelete = async (id) => {
+    try {
+      await deleteReminder(id, token);
+      loadReminders();
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  // edit
+  const handleEdit = (r) => {
+    setTitle(r.title || "");
+    setDescription(r.description || "");
+    setDate(r.date?.slice(0, 10) || "");
+    setHour(r.time?.hour ?? "");
+    setMinute(r.time?.minute ?? "");
+    setShowModal(true);
+    setEditingId(r._id);
+  };
+
+  // submit
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    const payload = {
+      title,
+      description,
+      date,
+      time: {
+        hour: Number(hour),
+        minute: Number(minute),
+      },
+    };
+
+    try {
+      if (editingId) {
+        await updateReminder(editingId, payload, token);
+      } else {
+        await createReminder(payload, token);
+      }
+
+      loadReminders();
+      closeModal();
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  return (
+    <div className="page">
+
+      {/* HEADER */}
+      <div className="header">
+        <button onClick={() => navigate(-1)} className="back">
+          <ArrowLeft size={20} />
+        </button>
+
+        <h2>My Reminders</h2>
+
+        <button className="add" onClick={() => setShowModal(true)}>
+          + Create
+        </button>
+      </div>
+
+      {/* LIST */}
+      <div className="list">
+        {reminders.length === 0 ? (
+          <p className="empty">No reminders yet</p>
+        ) : (
+          reminders.map((r) => (
+            <div className="card" key={r._id}>
+
+              <div className="card-header">
+                <h3>{r.title}</h3>
+
+                <div className="menu-wrapper">
+                  <button
+                    onClick={() =>
+                      setOpenMenuId(openMenuId === r._id ? null : r._id)
+                    }
+                    className="menu-btn"
+                  >
+                    <MoreVertical size={18} />
+                  </button>
+
+                  {openMenuId === r._id && (
+                    <div className="dropdown">
+                      <button onClick={() => handleEdit(r)}>Edit</button>
+                      <button onClick={() => handleDelete(r._id)}>
+                        Delete
+                      </button>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              <p className="desc">{r.description}</p>
+
+              <div className="time">
+                {r.date?.slice(0, 10)} - {formatTime(r.time)}
+              </div>
+            </div>
+          ))
+        )}
+      </div>
+
+      {/* MODAL */}
+      {showModal && (
+        <div className="overlay">
+          <div className="modal">
+
+            <h3>{editingId ? "Edit Reminder" : "Create Reminder"}</h3>
+
+            <form onSubmit={handleSubmit}>
+
+              <input
+                type="text"
+                placeholder="Title"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                required
+              />
+
+              <input
+                type="text"
+                placeholder="Description"
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+              />
+
+              <input
+                type="date"
+                value={date}
+                onChange={(e) => setDate(e.target.value)}
+                required
+              />
+
+              <div className="row">
+                <input
+                  type="number"
+                  placeholder="Hour"
+                  value={hour}
+                  onChange={(e) => setHour(e.target.value)}
+                  min="0"
+                  max="23"
+                  required
+                />
+
+                <input
+                  type="number"
+                  placeholder="Minute"
+                  value={minute}
+                  onChange={(e) => setMinute(e.target.value)}
+                  min="0"
+                  max="59"
+                  required
+                />
+              </div>
+
+              <select
+                value={before}
+                onChange={(e) => setBefore(e.target.value)}
+              >
+                <option value="5">5 min before</option>
+                <option value="10">10 min before</option>
+                <option value="15">15 min before</option>
+                <option value="20">20 min before</option>
+              </select>
+
+              <div className="actions">
+                <button type="submit">
+                  {editingId ? "Update" : "Create"}
+                </button>
+
+                <button type="button" onClick={closeModal}>
+                  Cancel
+                </button>
+              </div>
+
+            </form>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
