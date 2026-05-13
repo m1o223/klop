@@ -1,14 +1,34 @@
 import axios from "axios";
 
+const API = "https://finda-backend-2.onrender.com/api/auth";
+
 export const getProfile = async () => {
+
   const token = localStorage.getItem("token");
 
   const response = await axios.get(
-    "https://finda-backend-2.onrender.com/api/auth/me",
+    `${API}/me`,
     {
       headers: {
-        Authorization: `Bearer ${token}`,
-      },
+        Authorization: `Bearer ${token}`
+      }
+    }
+  );
+
+  return response.data;
+};
+
+export const updatePreferences = async (data) => {
+
+  const token = localStorage.getItem("token");
+
+  const response = await axios.put(
+    `${API}/preferences`,
+    data,
+    {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
     }
   );
 
